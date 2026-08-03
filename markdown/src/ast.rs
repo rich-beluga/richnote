@@ -1,13 +1,19 @@
-//! Модель распарсенного Markdown-документа — зеркалит Kotlin sealed-иерархию
-//! в `app/src/main/java/.../markdown/MarkdownAst.kt`. Обе стороны обязаны совпадать:
-//! это единственный контракт между Rust и Kotlin (JSON — единственное, что летит
-//! через границу JNI).
+//! Abstract Syntax Tree (AST) definitions for the RichNote Markdown parser
+
+/*
+ *       |\      _,,,---,,_
+ * ZZZzz /, \`.-'\`'    -.  ;-;;,_
+ *      |,4-  ) )-,_. ,\` (  `'-'
+ *     '---''(_/--'  \`-'\\_)
+ *
+ *  RichNote
+ *    rich_beluga, 2026
+ */
 
 pub enum InlineNode {
     Text(String),
     Bold(Vec<InlineNode>),
     Italic(Vec<InlineNode>),
-    /// Код НЕ разбирается дальше — по спеке Markdown это буквальный текст.
     Code(String),
 }
 
@@ -16,9 +22,6 @@ pub enum BlockNode {
     ThematicBreak,
 }
 
-/// Экранирование строки под JSON string literal. `"`, `\`, управляющие символы —
-/// остальное (включая не-ASCII: кириллица, эмодзи) идёт как есть, JSON по спеке
-/// обязан быть валиден в UTF-8 без дополнительного экранирования.
 fn escape_json(input: &str) -> String {
     let mut out = String::with_capacity(input.len() + 2);
     for ch in input.chars() {
@@ -70,8 +73,6 @@ impl BlockNode {
     }
 }
 
-/// Единственная публичная функция модуля — сериализует весь документ в JSON-массив
-/// блоков. Формат: см. markdown/README.md ("Контракт JSON").
 pub fn blocks_to_json(blocks: &[BlockNode]) -> String {
     let parts: Vec<String> = blocks.iter().map(BlockNode::to_json).collect();
     format!("[{}]", parts.join(","))

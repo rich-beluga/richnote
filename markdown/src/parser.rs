@@ -1,17 +1,21 @@
-//! Минимальный Markdown-парсер — НЕ полная реализация CommonMark, это перенос
-//! исходной Kotlin-версии на native. Понимает:
-//!  - **bold**
-//!  - *italic*
-//!  - `code` (литерально, без вложенного разбора)
-//!  - --- / *** / ___ на всю строку (≥3 повтора одного символа, только пробелы вокруг)
-//!
-//! Сознательно НЕ сделано (как и раньше): экранирование (`\*`), заголовки, списки,
-//! ссылки, code fences, бэктрекинг при некорректно закрытых `*`/`**`.
+//! Minimal Markdown parser
+//! **bold**
+//! *italic*
+//! `code`
+//! --- / *** / ___ dividers
+
+/*
+ *       |\      _,,,---,,_
+ * ZZZzz /, `.-'`'    -.  ;-;;,_
+ *      |,4-  ) )-,_. ,` (  `'-'
+ *     '---''(_/--'  `-'\\_)
+ *
+ *  RichNote
+ *    rich_beluga, 2026
+ */
 
 use crate::ast::{BlockNode, InlineNode};
 
-/// Блочный разбор: построчно группирует текст в параграфы, разделённые пустыми
-/// строками или строкой-разделителем.
 pub fn parse(source: &str) -> Vec<BlockNode> {
     let mut blocks = Vec::new();
     let mut paragraph_lines: Vec<&str> = Vec::new();
@@ -54,11 +58,6 @@ fn is_thematic_break(line: &str) -> bool {
     false
 }
 
-/// Инлайн-разбор: линейное сканирование с рекурсией внутрь bold/italic (чтобы
-/// `**bold *and italic* text**` тоже работал), без рекурсии внутрь code.
-/// Разделители `*`/`` ` `` — однобайтовые ASCII-символы, поэтому байтовые срезы
-/// по их позициям всегда попадают на границу UTF-8 символа (не ломают кириллицу
-/// и прочий не-ASCII текст вокруг них).
 pub fn parse_inline(text: &str) -> Vec<InlineNode> {
     let mut nodes = Vec::new();
     let mut buffer = String::new();
@@ -91,8 +90,6 @@ pub fn parse_inline(text: &str) -> Vec<InlineNode> {
             }
         }
 
-        // Не разделитель или закрывающая пара не нашлась — один char (не байт!)
-        // в текстовый буфер и дальше.
         let ch = text[i..].chars().next().unwrap();
         buffer.push(ch);
         i += ch.len_utf8();
@@ -113,9 +110,6 @@ fn flush_text(buffer: &mut String, nodes: &mut Vec<InlineNode>) {
 mod tests {
     use super::*;
 
-    // `cargo test` гоняется на хосте (не нужен Android NDK) — быстрая проверка
-    // логики без пересборки .so и без эмулятора/устройства.
-
     #[test]
     fn thematic_break_variants() {
         assert!(is_thematic_break("---"));
@@ -129,12 +123,11 @@ mod tests {
     #[test]
     fn bold_and_italic_and_code() {
         let nodes = parse_inline("**bold** *italic* `code`");
-        assert_eq!(nodes.len(), 5); // Bold, " ", Italic, " ", Code
+        assert_eq!(nodes.len(), 5);
     }
 
     #[test]
     fn unicode_safe() {
-        // Кириллица вокруг ASCII-разделителей не должна паниковать на срезах.
         let nodes = parse_inline("Привет **жирный** мир, código `код`");
         assert!(!nodes.is_empty());
     }
