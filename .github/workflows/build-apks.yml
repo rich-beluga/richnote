@@ -33,13 +33,10 @@ jobs:
         with:
           workspaces: markdown
 
-      - name: Set up Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r29
-          link-to-sdk: true
-          local-cache: true
+      - name: Point ANDROID_NDK_HOME at the runner's pre-installed NDK
+        run: |
+          echo "Раннер уже поставляет NDK: $ANDROID_NDK_ROOT"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_ROOT" >> "$GITHUB_ENV"
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
@@ -48,8 +45,6 @@ jobs:
         run: cargo test
 
       - name: Build .so for all ABIs
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cargo ndk \
             -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
