@@ -13,10 +13,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rich_beluga.richnote.core.EditorViewModel
+import com.rich_beluga.richnote.ui.AboutScreen
 import com.rich_beluga.richnote.ui.EditorScreen
+import com.rich_beluga.richnote.ui.SettingsScreen
+
+/**
+ * Три экрана приложения, без Navigation Compose — их мало, и explicit state
+ * проще правится вручную, чем NavHost с graph-builder'ом ради трёх пунктов.
+ * Если экранов станет заметно больше — стоит перейти на navigation-compose.
+ */
+private enum class Screen { Editor, Settings, About }
 
 class MainActivity : ComponentActivity() {
 
@@ -49,21 +61,35 @@ class MainActivity : ComponentActivity() {
 
             MaterialTheme(colorScheme = colorScheme) {
                 Surface(modifier = Modifier) {
-                    val state by viewModel.uiState.collectAsStateWithLifecycle()
+                    var screen by remember { mutableStateOf(Screen.Editor) }
 
-                    EditorScreen(
-                        state = state,
-                        onContentChange = viewModel::onContentChange,
-                        onOpenClick = { openDocumentLauncher.launch(arrayOf("text/*")) },
-                        onSaveClick = {
-                            if (state.isNewFile) {
-                                createDocumentLauncher.launch(state.fileName)
-                            } else {
-                                viewModel.save(this)
-                            }
-                        },
-                        onNewClick = { viewModel.newFile() }
-                    )
+                    when (screen) {
+                        Screen.Editor -> {
+                            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+                            EditorScreen(
+                                state = state,
+                                onContentChange = viewModel::onContentChange,
+                                onOpenClick = { openDocumentLauncher.launch(arrayOf("text/*")) },
+                                onSaveClick = {
+                                    if (state.isNewFile) {
+                                        createDocumentLauncher.launch(state.fileName)
+                                    } else {
+                                        viewModel.save(this)
+                                    }
+                                },
+                                onNewClick = { viewModel.newFile() },
+                                onSettingsClick = { screen = Screen.Settings }
+                            )
+                        }
+                        Screen.Settings -> SettingsScreen(
+                            onBackClick = { screen = Screen.Editor },
+                            onAboutClick = { screen = Screen.About }
+                        )
+                        Screen.About -> AboutScreen(
+                            onBackClick = { screen = Screen.Settings }
+                        )
+                    }
                 }
             }
         }

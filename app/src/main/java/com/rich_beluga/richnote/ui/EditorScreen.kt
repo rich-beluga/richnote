@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,6 +71,7 @@ fun EditorScreen(
     onOpenClick: () -> Unit,
     onSaveClick: () -> Unit,
     onNewClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,6 +111,9 @@ fun EditorScreen(
                     }
                     IconButton(onClick = onSaveClick, enabled = state.isDirty || state.isNewFile) {
                         Icon(Icons.Filled.Save, contentDescription = "Сохранить")
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Настройки")
                     }
                 }
             )
