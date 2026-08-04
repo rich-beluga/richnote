@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.rich_beluga.richnote.app.BuildConfig
+import com.rich_beluga.richnote.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
