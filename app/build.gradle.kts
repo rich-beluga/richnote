@@ -4,6 +4,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+fun gitShortSha(): String = try {
+    val process = ProcessBuilder("git", "rev-parse", "--short=7", "HEAD")
+        .redirectErrorStream(true)
+        .start()
+    val output = process.inputStream.bufferedReader().readText().trim()
+    if (process.waitFor() == 0 && output.isNotEmpty()) output else "unknown"
+} catch (e: Exception) {
+    "unknown"
+}
+
 android {
     namespace = "com.rich_beluga.richnote"
     compileSdk = 35
@@ -12,8 +22,10 @@ android {
         applicationId = "com.rich_beluga.richnote"
         minSdk = 31
         targetSdk = 35
-        versionCode = 5
+        versionCode = 7
         versionName = "1.0"
+
+        buildConfigField("String", "GIT_SHA", "\"${gitShortSha()}\"")
     }
 
     buildFeatures {
