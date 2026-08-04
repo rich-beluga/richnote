@@ -1,9 +1,14 @@
 package com.rich_beluga.richnote.ui
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,8 +20,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.BuildConfig
@@ -50,21 +61,68 @@ fun AboutScreen(
         ) {
             Text(
                 text = "RichNote",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(
-                text = "Версия ${BuildConfig.VERSION_NAME} (сборка ${BuildConfig.VERSION_CODE})",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontFamily = JetBrainsMonoVariableBold,
+                    fontWeight = FontWeight.Bold
+                ),
+                textAlign = TextAlign.Center
             )
 
             Text(
-                text = "Здесь будет текст об авторе.",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) | ${BuildConfig.GIT_SHA}",
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoRegular),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 32.dp)
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            // Не по центру (в отличие от всего остального на экране) — как просили.
+            Text(
+                text = "Developer",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Start)
+                    .padding(top = 24.dp)
+            )
+
+            DeveloperAvatar(modifier = Modifier.padding(top = 16.dp))
+
+            Text(
+                text = "Kotlin/Rust developer",
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoRegular),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp)
             )
         }
+    }
+}
+
+/**
+ * rich_beluga.png лежит в assets/, а не res/drawable/ — поэтому не painterResource,
+ * а ручная декодировка через AssetManager. Круглая форма — Modifier.clip(CircleShape),
+ * ContentScale.Crop — чтобы прямоугольная картинка заполнила круг без искажений.
+ */
+@Composable
+private fun DeveloperAvatar(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val avatar = remember {
+        runCatching {
+            context.assets.open("rich_beluga.png").use { stream ->
+                BitmapFactory.decodeStream(stream).asImageBitmap()
+            }
+        }.getOrNull()
+    }
+
+    avatar?.let {
+        Image(
+            bitmap = it,
+            contentDescription = "Аватар разработчика",
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+                .size(96.dp)
+                .clip(CircleShape)
+        )
     }
 }
