@@ -2,7 +2,9 @@ package com.rich_beluga.richnote.ui
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,12 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.BuildConfig
+import com.rich_beluga.richnote.ui.components.InfoCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,8 +87,22 @@ fun AboutScreen(
             )
 
             Text(
+                text = "A feature-rich note-taking app based on Markdown",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Text(
                 text = "Developer",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Bold
+                ),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,6 +120,41 @@ fun AboutScreen(
                 ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 12.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                InfoCard(
+                    icon = rememberVectorPainter(Icons.Filled.Code),
+                    title = "Kotlin",
+                    description = "Compose Material 3",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+                InfoCard(
+                    icon = rememberVectorPainter(Icons.Filled.Bolt),
+                    title = "Rust",
+                    description = "Native lib",
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            InfoCard(
+                icon = rememberVectorPainter(Icons.Filled.Palette),
+                title = "Material You",
+                description = "Dynamic palette",
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(top = 10.dp)
             )
         }
     }
