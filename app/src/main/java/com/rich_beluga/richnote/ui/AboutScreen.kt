@@ -129,17 +129,17 @@ fun AboutScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 InfoCard(
-                    icon = rememberVectorPainter(Icons.Filled.Code),
-                    title = "Kotlin",
-                    description = "Compose Material 3",
+                    icon = painterResource(R.drawable.ic_github),
+                    title = "GitHub",
+                    description = "Source code",
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.weight(1f)
                 )
                 InfoCard(
-                    icon = rememberVectorPainter(Icons.Filled.Bolt),
-                    title = "Rust",
-                    description = "Native lib",
+                    icon = painterResource(R.drawable.ic_license),
+                    title = "MIT License",
+                    description = "License",
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.weight(1f)
@@ -147,9 +147,9 @@ fun AboutScreen(
             }
 
             InfoCard(
-                icon = rememberVectorPainter(Icons.Filled.Palette),
-                title = "Material You",
-                description = "Dynamic palette",
+                icon = painterResource(R.drawable.ic_markdown),
+                title = "Markdown",
+                description = "Markdown-based notes",
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 modifier = Modifier
@@ -174,7 +174,7 @@ private fun DeveloperAvatar(modifier: Modifier = Modifier) {
     avatar?.let {
         Image(
             bitmap = it,
-            contentDescription = "Аватар разработчика",
+            contentDescription = "developer avatar",
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .size(128.dp)
