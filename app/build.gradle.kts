@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.rich_beluga.richnote.app"
+    namespace = "com.rich_beluga.richnote"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.rich_beluga.richnote.app"
+        applicationId = "com.rich_beluga.richnote"
         minSdk = 31
         targetSdk = 35
         versionCode = 5
