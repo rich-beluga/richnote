@@ -6,14 +6,14 @@ import androidx.compose.ui.text.font.FontWeight
 import com.rich_beluga.richnote.R
 
 /**
- * JetBrains Mono, файлы в res/fonts/. jetbrains_mono_variable.ttf — variable-шрифт,
- * поэтому вес (Bold) задаётся прямо на Font() — система рендерит нужную ось веса
- * из того же файла, отдельный bold-файл не нужен.
+ * JetBrains Mono, вариативный шрифт
+ * регистрируется несколько раз с разными весами (`Normal`, `Medium`,
+ * `Bold` и `ExtraBold`
  */
-val JetBrainsMonoVariableBold = FontFamily(
-    Font(R.font.jetbrains_mono_variable, weight = FontWeight.Bold)
-)
 
-val JetBrainsMonoRegular = FontFamily(
-    Font(R.font.jetbrains_mono_regular, weight = FontWeight.Normal)
+val JetBrainsMono = FontFamily(
+    Font(r.font.jetbrains_mono_variable, weight = FontWeight.Normal)
+    Font(r.font.jetbrains_mono_variable, weight = FontWeight.Medium)
+    Font(r.font.jetbrains_mono_variable, weight = FontWeight.Bold)
+    Font(r.font.jetbrains_mono_variable, weight = FontWeight.ExtraBold)
 )

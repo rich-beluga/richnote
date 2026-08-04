@@ -62,21 +62,23 @@ fun AboutScreen(
             Text(
                 text = "RichNote",
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontFamily = JetBrainsMonoVariableBold,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.ExtraBold
                 ),
                 textAlign = TextAlign.Center
             )
 
             Text(
                 text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) | ${BuildConfig.GIT_SHA}",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoRegular),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Normal
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            // Не по центру (в отличие от всего остального на экране) — как просили.
             Text(
                 text = "Developer",
                 style = MaterialTheme.typography.titleMedium,
@@ -91,7 +93,10 @@ fun AboutScreen(
 
             Text(
                 text = "Kotlin/Rust developer",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoRegular),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Normal
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 12.dp)
             )
@@ -99,11 +104,6 @@ fun AboutScreen(
     }
 }
 
-/**
- * rich_beluga.png лежит в assets/, а не res/drawable/ — поэтому не painterResource,
- * а ручная декодировка через AssetManager. Круглая форма — Modifier.clip(CircleShape),
- * ContentScale.Crop — чтобы прямоугольная картинка заполнила круг без искажений.
- */
 @Composable
 private fun DeveloperAvatar(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -121,7 +121,7 @@ private fun DeveloperAvatar(modifier: Modifier = Modifier) {
             contentDescription = "Аватар разработчика",
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .size(96.dp)
+                .size(128.dp)
                 .clip(CircleShape)
         )
     }
