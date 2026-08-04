@@ -1,5 +1,11 @@
 package com.rich_beluga.richnote.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,16 +51,33 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .padding(padding)
         ) {
-            ListItem(
-                headlineContent = { Text("О приложении") },
-                leadingContent = { Icon(Icons.Filled.Info, contentDescription = null) },
-                trailingContent = {
-                    Icon(Icons.Filled.ChevronRight, contentDescription = null)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onAboutClick)
-            )
+            // Дефолтная анимация появления пункта при первом составлении экрана:
+            // fadeIn()/expandVertically() без кастомных duration/easing — то есть
+            // ровно default-спеки самого Compose, не подкрученные вручную.
+            // MutableTransitionState(false) + targetState = true в LaunchedEffect —
+            // стандартный паттерн "проиграть enter-анимацию один раз при появлении".
+            // Когда пунктов станет больше одного — тот же паттерн просто
+            // применяется к каждому из них (при желании с небольшим delay
+            // между ними для лёгкого stagger-эффекта).
+            val itemVisible = remember { MutableTransitionState(false) }
+            LaunchedEffect(Unit) { itemVisible.targetState = true }
+
+            AnimatedVisibility(
+                visibleState = itemVisible,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                ListItem(
+                    headlineContent = { Text("О приложении") },
+                    leadingContent = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    trailingContent = {
+                        Icon(Icons.Filled.ChevronRight, contentDescription = null)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onAboutClick)
+                )
+            }
         }
     }
 }
