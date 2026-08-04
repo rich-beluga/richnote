@@ -25,7 +25,7 @@ val JetBrainsMono = FontFamily(
         weight = FontWeight.Bold
     ),
     Font(
-        R.font.jetbrains_mono_extrabolf,
+        R.font.jetbrains_mono_extrabold,
         weight = FontWeight.ExtraBold
     ),
 )
