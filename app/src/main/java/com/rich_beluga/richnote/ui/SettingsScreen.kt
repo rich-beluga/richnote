@@ -1,6 +1,7 @@
 package com.rich_beluga.richnote.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.RepeatMode
@@ -78,8 +79,6 @@ fun SettingsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            // Без заголовка и без фона: крупная надпись "Настройки" теперь
-            // живёт в hero-зоне ниже, а тут — только стрелка назад поверх неё.
             TopAppBar(
                 title = {},
                 navigationIcon = {
