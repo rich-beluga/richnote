@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.border
 import com.rich_beluga.richnote.BuildConfig
 import com.rich_beluga.richnote.ui.components.InfoCard
 import com.rich_beluga.richnote.R
@@ -199,6 +200,12 @@ private fun DeveloperAvatar(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .size(128.dp)
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                )
+                .padding(2.dp)
                 .clip(CircleShape)
         )
     }
