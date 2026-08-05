@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,29 +40,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.rich_beluga.richnote.R
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 
-/**
- * Экран редактора без зависимости от Activity/навигации — принимает состояние и колбэки,
- * поэтому одинаково легко встраивается и в тестовое приложение, и позже в ISExplorer
- * (например как отдельный composable в NavHost поверх файлового менеджера).
- *
- * UI-заметки:
- * - Никаких рамок вокруг текста — Scaffold отдаёт под контент весь экран
- *   (contentWindowInsets = WindowInsets(0)), инсеты статус-бара обрабатывает только TopAppBar.
- * - Перенос строк отключён: BasicTextField не зажат по ширине (только внутри
- *   horizontalScroll-контейнера), поэтому длинные строки не заворачиваются, а скроллятся
- *   вбок. Вертикальный скролл — отдельным внешним Box.
- * - Текущая строка подсвечивается прямоугольником на всю ширину экрана позади текста,
- *   его позиция берётся из TextLayoutResult (onTextLayout) по offset курсора.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
@@ -70,6 +59,8 @@ fun EditorScreen(
     onOpenClick: () -> Unit,
     onSaveClick: () -> Unit,
     onNewClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onFileExplorerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,7 +72,6 @@ fun EditorScreen(
 
     Scaffold(
         modifier = modifier,
-        // Только верхняя шапка резервирует место под системные бары — тело экрана edge-to-edge.
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -92,6 +82,11 @@ fun EditorScreen(
                         maxLines = 1
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = onFileExplorerClick) {
+                        Icon(painterResource(R.drawable.ic_file_explorer), contentDescription = "Проводник")
+                    }
+                },
                 actions = {
                     IconButton(onClick = onNewClick) {
                         Icon(Icons.Filled.InsertDriveFile, contentDescription = "Новый файл")
@@ -99,8 +94,6 @@ fun EditorScreen(
                     IconButton(onClick = onOpenClick) {
                         Icon(Icons.Filled.FolderOpen, contentDescription = "Открыть")
                     }
-                    // Черновой предпросмотр Markdown — переключает EditorTextArea/MarkdownPreview.
-                    // Пока не привязан к расширению файла, включается вручную для любого текста.
                     IconButton(onClick = { showPreview = !showPreview }) {
                         Icon(
                             if (showPreview) Icons.Filled.Edit else Icons.Filled.Visibility,
@@ -109,6 +102,9 @@ fun EditorScreen(
                     }
                     IconButton(onClick = onSaveClick, enabled = state.isDirty || state.isNewFile) {
                         Icon(Icons.Filled.Save, contentDescription = "Сохранить")
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Настройки")
                     }
                 }
             )
@@ -122,9 +118,6 @@ fun EditorScreen(
         ) {
             when {
                 state.isLoading -> {
-                    // Стабильный CircularProgressIndicator. M3 Expressive LoadingIndicator
-                    // (морфинг формы вместо кругового вращения) пока живёт только в alpha-канале
-                    // material3 — сознательно не тянем его ради стабильности сборки, см. README.
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 showPreview -> MarkdownPreview(text = state.content.text)
@@ -161,9 +154,6 @@ private fun EditorTextArea(
             .fillMaxSize()
             .verticalScroll(vScroll)
     ) {
-        // Подсветка текущей строки — рисуется первой, поэтому оказывается позади текста.
-        // Ширина — на весь экран (а не на ширину строки), чтобы не зависеть от
-        // горизонтального скролла длинных строк.
         layoutResult?.let { result ->
             val safeOffset = state.content.selection.start.coerceIn(0, result.layoutInput.text.length)
             val line = result.getLineForOffset(safeOffset)

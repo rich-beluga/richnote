@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
  */
 data class EditorUiState(
     val uri: Uri? = null,
-    val fileName: String = "Untitled.txt",
+    val fileName: String = "Untitled.md",
     val content: TextFieldValue = TextFieldValue(""),
     val originalContent: String = "",
     val isLoading: Boolean = false,

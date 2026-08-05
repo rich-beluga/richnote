@@ -19,11 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
 
-/**
- * Отрисовка распарсенного Markdown в Compose. Сам парсер (markdown-пакет) ничего
- * про Compose не знает — вся стилизация (жирный/курсив/моноширинный код) собрана здесь.
- */
-
 private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>) {
     for (node in nodes) {
         when (node) {
