@@ -40,12 +40,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.rich_beluga.richnote.R
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 
@@ -72,6 +74,7 @@ fun EditorScreen(
     onSaveClick: () -> Unit,
     onNewClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onFileExplorerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -93,6 +96,14 @@ fun EditorScreen(
                         text = if (state.isDirty) "${state.fileName} •" else state.fileName,
                         maxLines = 1
                     )
+                },
+                navigationIcon = {
+                    // TODO: R.drawable.ic_file_explorer — ресурса пока нет, добавляете сами
+                    // (см. описание задачи: "иконку не ложи"). До тех пор проект не соберётся —
+                    // это ожидаемо, не баг.
+                    IconButton(onClick = onFileExplorerClick) {
+                        Icon(painterResource(R.drawable.ic_file_explorer), contentDescription = "Проводник")
+                    }
                 },
                 actions = {
                     IconButton(onClick = onNewClick) {
