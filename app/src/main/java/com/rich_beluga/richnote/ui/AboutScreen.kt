@@ -115,13 +115,24 @@ fun AboutScreen(
             DeveloperAvatar(modifier = Modifier.padding(top = 16.dp))
 
             Text(
+                text = "rich_beluga",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+
+            Text(
                 text = "Kotlin/Rust developer",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Normal
                 ),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
 
             Row(
