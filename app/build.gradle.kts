@@ -22,7 +22,7 @@ android {
         applicationId = "com.rich_beluga.richnote"
         minSdk = 31
         targetSdk = 35
-        versionCode = 7
+        versionCode = 12
         versionName = "1.0"
 
         buildConfigField("String", "GIT_SHA", "\"${gitShortSha()}\"")
