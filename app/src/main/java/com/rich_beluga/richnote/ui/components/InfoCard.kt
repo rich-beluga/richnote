@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,20 +26,24 @@ import com.rich_beluga.richnote.ui.JetBrainsMono
  * какой текст или какой цвет — всё это приходит снаружи (AboutScreen),
  * здесь только компоновка и типографика.
  *
- * icon — Painter, а не ImageVector: подходит и под painterResource(R.drawable...)
+ * icon — Painter: подходит и под painterResource(R.drawable...)
  * для своих иконок из res/drawable, и под rememberVectorPainter() для готовых
- * Material-иконок (последним пользуются плейсхолдеры в AboutScreen).
+ * Material-иконок
  */
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoCard(
     icon: Painter,
     title: String,
     description: String,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     Card(
+        onClick = { onClick?.invoke() }, 
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
