@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
     // ACTION_CREATE_DOCUMENT — создать новый файл ("Сохранить как" / первое сохранение)
     private val createDocumentLauncher = registerForActivityResult(
-        ActivityResultContracts.CreateDocument("text/plain")
+        ActivityResultContracts.CreateDocument("text/markdown")
     ) { uri ->
         uri?.let { viewModel.saveAsNewUri(this, it) }
     }
