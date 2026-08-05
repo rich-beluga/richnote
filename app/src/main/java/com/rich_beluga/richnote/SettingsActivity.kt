@@ -18,16 +18,6 @@ import androidx.compose.ui.Modifier
 import com.rich_beluga.richnote.ui.AboutScreen
 import com.rich_beluga.richnote.ui.SettingsScreen
 
-/**
- * Настройки — отдельная Activity, а не composable-состояние внутри MainActivity.
- * Ради этого и затевалось: MainActivity.startActivity(Intent(...)) без
- * overridePendingTransition/overrideActivityTransition даёт стандартный системный
- * Activity-transition открытия бесплатно — как раз "дефолтные анимации Android".
- *
- * "О приложении" остаётся вложенной локальной навигацией внутри ЭТОЙ Activity
- * (Settings ⇄ About), а не отдельной Activity — так и было раньше, только весь
- * узел целиком переехал сюда из MainActivity вместе с настройками.
- */
 private enum class SettingsScreenState { Settings, About }
 
 class SettingsActivity : ComponentActivity() {
@@ -43,17 +33,12 @@ class SettingsActivity : ComponentActivity() {
                 Surface(modifier = Modifier) {
                     var screen by remember { mutableStateOf(SettingsScreenState.Settings) }
 
-                    // Системный back (кнопка/жест) на About должен вести на Settings,
-                    // а не сразу закрывать Activity в обход экрана настроек — иначе
-                    // жест ведёт себя иначе, чем стрелка "назад" в шапке.
                     BackHandler(enabled = screen == SettingsScreenState.About) {
                         screen = SettingsScreenState.Settings
                     }
 
                     when (screen) {
                         SettingsScreenState.Settings -> SettingsScreen(
-                            // finish() — обычное закрытие Activity, тоже с дефолтной
-                            // системной анимацией (никаких переопределений).
                             onBackClick = { finish() },
                             onAboutClick = { screen = SettingsScreenState.About }
                         )

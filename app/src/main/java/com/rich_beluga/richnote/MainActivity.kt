@@ -18,11 +18,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rich_beluga.richnote.core.EditorViewModel
 import com.rich_beluga.richnote.ui.EditorScreen
 
-/**
- * Настройки (и вложенное "О приложении") теперь отдельная Activity — см.
- * SettingsActivity. Здесь только редактор, поэтому никакого локального
- * Screen-enum/переключения состояния больше не нужно.
- */
 class MainActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
@@ -68,9 +63,6 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onNewClick = { viewModel.newFile() },
-                        // Обычный startActivity — никаких overridePendingTransition/
-                        // overrideActivityTransition, чтобы анимация открытия была
-                        // ровно системная дефолтная, как просили.
                         onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) }
                     )
                 }
