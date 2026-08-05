@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalUriHandler
@@ -70,6 +71,7 @@ import com.rich_beluga.richnote.R
  * пункта скругление углов у соседних карточек само пересчиталось правильно —
  * см. groupedCardShape ниже.
  */
+
 private data class SettingsItem(
     val icon: Painter,
     val title: String,
@@ -110,15 +112,18 @@ fun SettingsScreen(
 
             val uriHandler = LocalUriHandler.current
 
+            val githubIcon = painterResource(R.drawable.ic_github)
+            val infoIcon = rememberVectorPainter(Icons.Filled.Info)
+
             val items = remember {
                 listOf(
                     SettingsItem(
-                        icon = rememberVectorPainter(Icons.Filled.Info),
+                        icon = infoIcon,
                         title = "О приложении",
                         onClick = onAboutClick
-                    )
+                    ),
                     SettingsItem(
-                        icon = painterResource(R.drawable.github),
+                        icon = githubIcon,
                         title = "GitHub репозиторий",
                         onClick = {
                             uriHandler.openUri("https://github.com/rich-beluga/richnote")
