@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,8 @@ fun AboutScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val uriHandler = LocalUriHandler.current
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -147,6 +150,9 @@ fun AboutScreen(
                     description = "Source code",
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onClick = {
+                        uriHandler.openUri("https://github.com/rich-beluga/richnote")
+                    },
                     modifier = Modifier.weight(1f)
                 )
                 InfoCard(
@@ -155,6 +161,7 @@ fun AboutScreen(
                     description = "License",
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onClick = null,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -165,6 +172,7 @@ fun AboutScreen(
                 description = "Markdown-based notes",
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                onClick = null,
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .padding(top = 10.dp)
