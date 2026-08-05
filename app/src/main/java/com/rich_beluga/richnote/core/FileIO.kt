@@ -7,11 +7,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
-/**
- * Простые статeless-функции для чтения/записи текстовых файлов через SAF (Storage Access Framework).
- * Никакой зависимости от Activity — принимают Context, поэтому вызываются как из
- * ViewModel, так и из будущего кода ISExplorer напрямую.
- */
 object FileIO {
 
     /** Читает весь файл как текст в UTF-8. */
@@ -34,7 +29,7 @@ object FileIO {
 
     /** Достаёт человекочитаемое имя файла из Uri (для заголовка редактора). */
     fun queryFileName(context: Context, uri: Uri): String {
-        var name = uri.lastPathSegment ?: "Untitled.txt"
+        var name = uri.lastPathSegment ?: "Untitled.md"
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
             if (nameIndex >= 0 && cursor.moveToFirst()) {
