@@ -1,17 +1,19 @@
-//! Native libmarkdown.so parser
+//!       |\      _,,,---,,_
+//! ZZZzz /, \`.-'\`'    -.  ;-;;,_
+//!      |,4-  ) )-,_. ,\` (  `'-'
+//!     '---''(_/--'  \`-'\\_)
+//!
+//! libmarkdown.so — обёртка над cmark-gfm (github.com/github/cmark-gfm, сурсы
+//! в markdown/cmark-gfm/) вместо самодельного Rust-парсера. Весь разбор и рендер
+//! теперь на C-стороне (cmark-gfm/src/, компилируется напрямую из build.rs через
+//! `cc`, CMake не используется.
+//!
+//! Метод по-прежнему регистрируется явно через JNI_OnLoad/RegisterNatives
+//! (не через mangled-имя Java_com_..._MarkdownNative_parseMarkdown) — так
+//! переименование Kotlin-пакета не ломает линковку молча, менять нужно
+//! только NATIVE_CLASS.
 
-/*
- *       |\      _,,,---,,_
- * ZZZzz /, \`.-'\`'    -.  ;-;;,_
- *      |,4-  ) )-,_. ,\` (  `'-'
- *     '---''(_/--'  \`-'\\_)
- *
- *  RichNote
- *    rich_beluga, 2026
- */
-
-mod ast;
-mod parser;
+mod cmark;
 
 use jni::objects::{JClass, JString};
 use jni::strings::JNIString;
@@ -56,15 +58,12 @@ extern "system" fn parse_markdown<'local>(
         Err(_) => return std::ptr::null_mut(),
     };
 
-    let json = match std::panic::catch_unwind(|| {
-        let blocks = parser::parse(&input);
-        ast::blocks_to_json(&blocks)
-    }) {
-        Ok(json) => json,
-        Err(_) => return std::ptr::null_mut(),
+    let html = match std::panic::catch_unwind(|| cmark::render_html(&input)) {
+        Ok(Some(html)) => html,
+        Ok(None) | Err(_) => return std::ptr::null_mut(),
     };
 
-    match env.new_string(json) {
+    match env.new_string(html) {
         Ok(s) => s.into_raw(),
         Err(_) => std::ptr::null_mut(),
     }
