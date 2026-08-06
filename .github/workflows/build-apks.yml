@@ -52,7 +52,7 @@ jobs:
         run: |
           cargo ndk \
             -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
-            -p 21 \
+            --platform 31 \
             -o jniLibs \
             build --release
 
