@@ -27,15 +27,17 @@ jobs:
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v3
+        with:
+          ndk-version: r26c
+          android-version: 21
+
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: markdown
-
-      - name: Point ANDROID_NDK_HOME at the runner's pre-installed NDK
-        run: |
-          echo "Раннер уже поставляет NDK: $ANDROID_NDK_ROOT"
-          echo "ANDROID_NDK_HOME=$ANDROID_NDK_ROOT" >> "$GITHUB_ENV"
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
@@ -47,6 +49,7 @@ jobs:
         run: |
           cargo ndk \
             -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
+            -p 21 \
             -o jniLibs \
             build --release
 

@@ -12,8 +12,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check:
-    name: cargo check + cargo test
+  test:
+    name: Cargo test (Host)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,10 +23,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain + Android targets
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -36,14 +34,73 @@ jobs:
       - name: Cargo test
         run: cargo test
 
-      - name: Cargo check - arm64-v8a (aarch64-linux-android)
-        run: cargo check --target aarch64-linux-android
+  check-android:
+    name: Cargo check (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-linux-android
+            arch_name: arm64-v8a
+            api: 21
+          - target: armv7-linux-androideabi
+            arch_name: armeabi-v7a
+            api: 21
+          - target: x86_64-linux-android
+            arch_name: x86_64
+            api: 21
+          - target: i686-linux-android
+            arch_name: x86
+            api: 21
+    defaults:
+      run:
+        working-directory: markdown
 
-      - name: Cargo check - armeabi-v7a (armv7-linux-androideabi)
-        run: cargo check --target armv7-linux-androideabi
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Cargo check - x86_64
-        run: cargo check --target x86_64-linux-android
+      - name: Install Rust toolchain + target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
-      - name: Cargo check - x86 (i686-linux-android)
-        run: cargo check --target i686-linux-android
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v3
+        with:
+          ndk-version: r26c
+          android-version: ${{ matrix.api }}
+
+      - name: Configure C compiler environment
+        run: |
+          TOOLCHAIN="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          
+          case "${{ matrix.target }}" in
+            aarch64-linux-android)
+              HOST_PREFIX="aarch64-linux-android${{ matrix.api }}"
+              ;;
+            armv7-linux-androideabi)
+              HOST_PREFIX="armv7a-linux-androideabi${{ matrix.api }}"
+              ;;
+            x86_64-linux-android)
+              HOST_PREFIX="x86_64-linux-android${{ matrix.api }}"
+              ;;
+            i686-linux-android)
+              HOST_PREFIX="i686-linux-android${{ matrix.api }}"
+              ;;
+          esac
+
+          echo "CC=${TOOLCHAIN}/${HOST_PREFIX}-clang" >> $GITHUB_ENV
+          echo "AR=${TOOLCHAIN}/llvm-ar" >> $GITHUB_ENV
+          echo "LD=${TOOLCHAIN}/ld.lld" >> $GITHUB_ENV
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+          workspaces: markdown
+
+      - name: Cargo check
+        run: cargo check --target ${{ matrix.target }}
