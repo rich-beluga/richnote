@@ -43,7 +43,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -177,7 +179,7 @@ private fun EditorTextArea(
                 onValueChange = onContentChange,
                 onTextLayout = { layoutResult = it },
                 textStyle = TextStyle(
-                    fontFamily = FontFamily.JetBrainsMono,
+                    fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Normal,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     color = MaterialTheme.colorScheme.onSurface

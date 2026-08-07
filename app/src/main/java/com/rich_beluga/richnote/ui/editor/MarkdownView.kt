@@ -25,6 +25,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +48,7 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
             }
             is InlineNode.Code -> withStyle(
                 SpanStyle(
-                    fontFamily = FontFamily.JetBrainsMono,
+                    fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Normal,
                     background = Color.Black.copy(alpha = 0.06f)
                 )
@@ -116,7 +117,10 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = block.text,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Normal
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
