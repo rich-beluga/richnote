@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download native artifact into jniLibs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: native-jniLibs
           path: app/src/main/jniLibs
@@ -85,7 +85,7 @@ jobs:
           java-version: "17"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -110,7 +110,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download native artifact into jniLibs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: native-jniLibs
           path: app/src/main/jniLibs
@@ -122,7 +122,7 @@ jobs:
           java-version: "17"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
