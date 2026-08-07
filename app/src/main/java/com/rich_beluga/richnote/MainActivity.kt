@@ -27,8 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.rich_beluga.richnote.core.EditorViewModel
 import com.rich_beluga.richnote.core.FileTreeViewModel
-import com.rich_beluga.richnote.ui.EditorScreen
-import com.rich_beluga.richnote.ui.FileExplorerDrawer
+import com.rich_beluga.richnote.ui.editor.EditorScreen
+import com.rich_beluga.richnote.ui.explorer.FileExplorerDrawer
 import com.rich_beluga.richnote.ui.ManageStoragePermissionDialog
 import kotlinx.coroutines.launch
 
