@@ -123,7 +123,7 @@ fun LibrariesScreen(
     val uriHandler = LocalUriHandler.current
 
     val licenseIcon = painterResource(R.drawable.ic_license)
-    val homepageIcon = rememberVectorPainter(Icons.AutoMirrored.Filled.OpenInNew)
+    val homepageIcon = painterResource(R.drawable.ic_link)
 
     val items = remember {
         libraries.map { lib ->
