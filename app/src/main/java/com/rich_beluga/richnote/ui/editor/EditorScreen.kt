@@ -59,7 +59,6 @@ import com.rich_beluga.richnote.markdown.MarkdownParser
 fun EditorScreen(
     state: EditorUiState,
     onContentChange: (TextFieldValue) -> Unit,
-    onOpenClick: () -> Unit,
     onSaveClick: () -> Unit,
     onNewClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -93,9 +92,6 @@ fun EditorScreen(
                 actions = {
                     IconButton(onClick = onNewClick) {
                         Icon(Icons.Filled.InsertDriveFile, contentDescription = "Новый файл")
-                    }
-                    IconButton(onClick = onOpenClick) {
-                        Icon(Icons.Filled.FolderOpen, contentDescription = "Открыть")
                     }
                     IconButton(onClick = { showPreview = !showPreview }) {
                         Icon(

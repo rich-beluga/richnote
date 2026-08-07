@@ -36,13 +36,6 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
 
-    // ACTION_OPEN_DOCUMENT — выбрать существующий файл для чтения/записи
-    private val openDocumentLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.openFile(this, it) }
-    }
-
     // ACTION_CREATE_DOCUMENT — создать новый файл ("Сохранить как" / первое сохранение)
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/markdown")
@@ -96,7 +89,6 @@ class MainActivity : ComponentActivity() {
                         EditorScreen(
                             state = state,
                             onContentChange = viewModel::onContentChange,
-                            onOpenClick = { openDocumentLauncher.launch(arrayOf("text/*")) },
                             onSaveClick = {
                                 if (state.isNewFile) {
                                     createDocumentLauncher.launch(state.fileName)

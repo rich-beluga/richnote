@@ -71,10 +71,6 @@ class FileTreeViewModel : ViewModel() {
     private fun listEntries(directory: File): List<FileTreeEntry> {
         val files = directory.listFiles { file -> !file.isHidden } ?: return emptyList()
 
-        // Ключ сортировки (lowercase-имя) считаем один раз на файл, а не внутри
-        // компаратора — compareBy вызывает селекторы на каждое сравнение при
-        // sortedWith (O(n log n) вызовов .lowercase() вместо O(n) на большой
-        // директории это реально заметно, а не только "на бумаге").
         return files
             .map { file -> FileTreeEntry(file, file.isDirectory) to file.name.lowercase() }
             .sortedWith(compareBy({ (entry, _) -> !entry.isDirectory }, { (_, lowerName) -> lowerName }))
