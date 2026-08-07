@@ -33,6 +33,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
+import com.rich_beluga.richnote.ui.JetBrainsMono
 
 private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkColor: Color) {
     for (node in nodes) {
@@ -46,7 +47,8 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
             }
             is InlineNode.Code -> withStyle(
                 SpanStyle(
-                    fontFamily = FontFamily.Monospace,
+                    fontFamily = FontFamily.JetBrainsMono,
+                    fontWeight = FontWeight.Normal,
                     background = Color.Black.copy(alpha = 0.06f)
                 )
             ) {

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.R
+import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 
@@ -176,7 +177,8 @@ private fun EditorTextArea(
                 onValueChange = onContentChange,
                 onTextLayout = { layoutResult = it },
                 textStyle = TextStyle(
-                    fontFamily = FontFamily.Monospace,
+                    fontFamily = FontFamily.JetBrainsMono,
+                    fontWeight = FontWeight.Normal,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     color = MaterialTheme.colorScheme.onSurface
                 ),
