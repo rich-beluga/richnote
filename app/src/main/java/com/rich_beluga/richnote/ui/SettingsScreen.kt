@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -63,6 +62,7 @@ import com.rich_beluga.richnote.ui.shapes.CircleMaterialShape
 import com.rich_beluga.richnote.ui.shapes.Cookie9MaterialShape
 import com.rich_beluga.richnote.ui.shapes.ArrowMaterialShape
 import com.rich_beluga.richnote.ui.shapes.GhostIshMaterialShape
+import com.rich_beluga.richnote.ui.components.groupedCardShape
 import com.rich_beluga.richnote.R
 
 /**
@@ -178,27 +178,10 @@ fun SettingsScreen(
 }
 
 /**
- * Скругление карточки внутри "сегментированной" группы по её позиции:
- * первая — большой радиус сверху, маленький снизу; последняя — наоборот;
- * средние — маленький со всех сторон. Единственный элемент в группе
- * (isFirst && isLast) получает большой радиус со всех сторон — то есть
- * при одном пункте выглядит как обычная цельная карточка, а как только
- * появляется второй/третий пункт, группа сама "сегментируется".
+ * Скругление сегментированных карточек списка (groupedCardShape) — теперь общая
+ * функция в ui.components, см. GroupedCardShape.kt (используется и здесь, и в
+ * LibrariesScreen).
  */
-private fun groupedCardShape(index: Int, count: Int): RoundedCornerShape {
-    val isFirst = index == 0
-    val isLast = index == count - 1
-    val outer = 24.dp
-    val inner = 4.dp
-    val top = if (isFirst) outer else inner
-    val bottom = if (isLast) outer else inner
-    return RoundedCornerShape(
-        topStart = top,
-        topEnd = top,
-        bottomStart = bottom,
-        bottomEnd = bottom
-    )
-}
 
 /**
  * Hero-зона над списком настроек: несколько Material Shapes из ui/shapes
