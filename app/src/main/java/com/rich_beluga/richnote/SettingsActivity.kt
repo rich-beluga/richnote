@@ -16,9 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.rich_beluga.richnote.ui.AboutScreen
+import com.rich_beluga.richnote.ui.LibrariesScreen
 import com.rich_beluga.richnote.ui.SettingsScreen
 
-private enum class SettingsScreenState { Settings, About }
+private enum class SettingsScreenState { Settings, About, Libraries }
 
 class SettingsActivity : ComponentActivity() {
 
@@ -36,6 +37,9 @@ class SettingsActivity : ComponentActivity() {
                     BackHandler(enabled = screen == SettingsScreenState.About) {
                         screen = SettingsScreenState.Settings
                     }
+                    BackHandler(enabled = screen == SettingsScreenState.Libraries) {
+                        screen = SettingsScreenState.About
+                    }
 
                     when (screen) {
                         SettingsScreenState.Settings -> SettingsScreen(
@@ -43,7 +47,11 @@ class SettingsActivity : ComponentActivity() {
                             onAboutClick = { screen = SettingsScreenState.About }
                         )
                         SettingsScreenState.About -> AboutScreen(
-                            onBackClick = { screen = SettingsScreenState.Settings }
+                            onBackClick = { screen = SettingsScreenState.Settings },
+                            onLibrariesClick = { screen = SettingsScreenState.Libraries }
+                        )
+                        SettingsScreenState.Libraries -> LibrariesScreen(
+                            onBackClick = { screen = SettingsScreenState.About }
                         )
                     }
                 }
