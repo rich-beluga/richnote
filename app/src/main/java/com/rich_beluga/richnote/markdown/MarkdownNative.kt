@@ -17,15 +17,6 @@ internal object MarkdownNative {
         false
     }
 
-    /**
-     * Возвращает HTML, отрендеренный cmark-gfm (safe-режим: сырой HTML и опасные
-     * ссылки в исходном markdown экранируются, см. markdown/src/cmark.rs), или null,
-     * если разбор упал на native-стороне (см. catch_unwind в lib.rs). Разбор этого HTML
-     * обратно в [BlockNode]/[InlineNode] — в MarkdownParser, тут только сырой вызов.
-     *
-     * @JvmStatic обязателен: метод зарегистрирован в Rust как статический
-     * (JNI_OnLoad ожидает JClass вторым аргументом, а не JObject экземпляра object'а).
-     */
     @JvmStatic
     external fun parseMarkdown(source: String): String?
 }

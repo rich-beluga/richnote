@@ -1,6 +1,7 @@
 package com.rich_beluga.richnote.ui.editor
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -29,11 +30,13 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
+import com.rich_beluga.richnote.markdown.TableAlignment
 import com.rich_beluga.richnote.ui.JetBrainsMono
 
 private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkColor: Color) {
@@ -64,6 +67,11 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
                 // загрузчик изображений отсутствует -> плейсхолдер
                 // TODO: добавить поддержку отрисовки изображений
                 append("🖼 ${node.alt.ifBlank { "изображение" }}")
+            }
+            is InlineNode.Strikethrough -> withStyle(
+                SpanStyle(textDecoration = TextDecoration.LineThrough)
+            ) {
+                appendInline(node.children, linkColor)
             }
             InlineNode.LineBreak -> append("\n")
         }
@@ -149,6 +157,50 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
             block.items.forEachIndexed { index, item ->
                 ListItemRow(marker = "${block.start + index}.", children = item)
             }
+        }
+
+        is BlockNode.Table -> Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+        ) {
+            TableRowView(cells = block.header, alignments = block.alignments, isHeader = true)
+            block.rows.forEach { row ->
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                TableRowView(cells = row, alignments = block.alignments, isHeader = false)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAlignment>, isHeader: Boolean) {
+    val linkColor = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (isHeader) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+            )
+    ) {
+        cells.forEachIndexed { index, cell ->
+            val alignment = alignments.getOrElse(index) { TableAlignment.NONE }
+            Text(
+                text = cell.toAnnotatedString(linkColor),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal
+                ),
+                textAlign = when (alignment) {
+                    TableAlignment.CENTER -> TextAlign.Center
+                    TableAlignment.RIGHT -> TextAlign.End
+                    TableAlignment.LEFT, TableAlignment.NONE -> TextAlign.Start
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp)
+            )
         }
     }
 }

@@ -115,7 +115,7 @@ object MarkdownParser {
         return result.replace("&amp;", "&")
     }
 
-    private val BLOCK_TAGS = setOf("p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "ul", "ol", "pre", "hr")
+    private val BLOCK_TAGS = setOf("p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "ul", "ol", "pre", "hr", "table")
 
     private fun htmlToBlocks(html: String): List<BlockNode> = elementsToBlocks(buildTree(tokenize(html)))
 
@@ -131,6 +131,7 @@ object MarkdownParser {
         "ul" -> BlockNode.BulletList(listItems(el))
         "ol" -> BlockNode.OrderedList(start = el.attrs["start"]?.toIntOrNull() ?: 1, items = listItems(el))
         "pre" -> codeBlockFrom(el)
+        "table" -> tableFrom(el)
         else -> null
     }
 
@@ -155,6 +156,37 @@ object MarkdownParser {
         return BlockNode.CodeBlock(text.removeSuffix("\n"), language)
     }
 
+    private fun tableFrom(table: HtmlNode.Element): BlockNode.Table {
+        val children = table.children.filterIsInstance<HtmlNode.Element>()
+        val thead = children.firstOrNull { it.tag == "thead" }
+        val tbody = children.firstOrNull { it.tag == "tbody" }
+
+        val headerCells = thead?.children.orEmpty().filterIsInstance<HtmlNode.Element>()
+            .firstOrNull { it.tag == "tr" }
+            ?.children.orEmpty().filterIsInstance<HtmlNode.Element>()
+            .filter { it.tag == "th" }
+
+        val alignments = headerCells.map(::cellAlignment)
+        val header = headerCells.map { childrenToInline(it.children) }
+
+        val rows = tbody?.children.orEmpty().filterIsInstance<HtmlNode.Element>()
+            .filter { it.tag == "tr" }
+            .map { row ->
+                row.children.filterIsInstance<HtmlNode.Element>()
+                    .filter { it.tag == "td" }
+                    .map { cell -> childrenToInline(cell.children) }
+            }
+
+        return BlockNode.Table(alignments = alignments, header = header, rows = rows)
+    }
+
+    private fun cellAlignment(cell: HtmlNode.Element): TableAlignment = when (cell.attrs["align"]) {
+        "left" -> TableAlignment.LEFT
+        "center" -> TableAlignment.CENTER
+        "right" -> TableAlignment.RIGHT
+        else -> TableAlignment.NONE
+    }
+
     private fun childrenToInline(children: List<HtmlNode>): List<InlineNode> =
         children.mapNotNull(::nodeToInline)
 
@@ -169,6 +201,7 @@ object MarkdownParser {
             "a" -> InlineNode.Link(childrenToInline(node.children), node.attrs["href"].orEmpty())
             "img" -> InlineNode.Image(alt = node.attrs["alt"].orEmpty(), url = node.attrs["src"].orEmpty())
             "br" -> InlineNode.LineBreak
+            "del" -> InlineNode.Strikethrough(childrenToInline(node.children))
             else -> null
         }
     }
