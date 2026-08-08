@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -161,7 +163,7 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
 
         is BlockNode.Table -> Column(
             modifier = modifier
-                .fillMaxWidth()
+                .width(IntrinsicSize.Max)
                 .padding(vertical = 4.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
@@ -178,14 +180,19 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
 @Composable
 private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAlignment>, isHeader: Boolean) {
     val linkColor = MaterialTheme.colorScheme.primary
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .background(
                 if (isHeader) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
             )
     ) {
         cells.forEachIndexed { index, cell ->
+            if (index > 0) {
+                VerticalDivider(color = dividerColor)
+            }
             val alignment = alignments.getOrElse(index) { TableAlignment.NONE }
             Text(
                 text = cell.toAnnotatedString(linkColor),
@@ -199,10 +206,22 @@ private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAl
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
+                    .padding(cellPadding(alignment))
             )
         }
     }
+}
+
+/**
+ * Базовый отступ 8dp со всех сторон. При явном выравнивании (не NONE) текст
+ * прижимается к одному краю ячейки — добавляем на эту сторону чуть больше
+ * воздуха (12dp вместо 8dp), чтобы не липло к VerticalDivider/краю таблицы.
+ */
+private fun cellPadding(alignment: TableAlignment): PaddingValues = when (alignment) {
+    TableAlignment.LEFT -> PaddingValues(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+    TableAlignment.RIGHT -> PaddingValues(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
+    TableAlignment.CENTER -> PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+    TableAlignment.NONE -> PaddingValues(8.dp)
 }
 
 @Composable
