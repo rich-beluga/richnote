@@ -98,7 +98,7 @@ fun SettingsScreen(
 
             val uriHandler = LocalUriHandler.current
 
-            val appearanceIcon = painterResource(R.drawable.ic_github)
+            val appearanceIcon = painterResource(R.drawable.ic_pallete)
             val infoIcon = rememberVectorPainter(Icons.Filled.Info)
 
             val items = remember {
@@ -106,9 +106,7 @@ fun SettingsScreen(
                     SettingsItem(
                         icon = appearanceIcon,
                         title = "Внешний вид",
-                        onClick = {
-                            uriHandler.openUri("https://github.com/rich-beluga/richnote")
-                        }
+                        onClick = null
                     ),
                     SettingsItem(
                         icon = infoIcon,
