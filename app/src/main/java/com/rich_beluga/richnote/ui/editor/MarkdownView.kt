@@ -3,6 +3,7 @@ package com.rich_beluga.richnote.ui.editor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -28,8 +30,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -161,17 +161,25 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
             }
         }
 
-        is BlockNode.Table -> Column(
+        is BlockNode.Table -> BoxWithConstraints(
             modifier = modifier
-                .width(IntrinsicSize.Max)
+                .fillMaxWidth()
                 .padding(vertical = 4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
         ) {
-            TableRowView(cells = block.header, alignments = block.alignments, isHeader = true)
-            block.rows.forEach { row ->
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                TableRowView(cells = row, alignments = block.alignments, isHeader = false)
+            val minTableWidth = maxWidth // Минимальная ширина - экран устройства
+            Column(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .width(IntrinsicSize.Max) // Позволяет строкам измерить свой контент
+                    .widthIn(min = minTableWidth) // Растягиваем таблицу на весь экран, если она меньше
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            ) {
+                TableRowView(cells = block.header, alignments = block.alignments, isHeader = true)
+                block.rows.forEach { row ->
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    TableRowView(cells = row, alignments = block.alignments, isHeader = false)
+                }
             }
         }
     }
@@ -206,6 +214,7 @@ private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAl
                 },
                 modifier = Modifier
                     .weight(1f)
+                    .widthIn(min = 120.dp)
                     .padding(cellPadding(alignment))
             )
         }
