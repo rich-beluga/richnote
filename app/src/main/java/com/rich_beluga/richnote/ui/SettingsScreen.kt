@@ -61,7 +61,7 @@ import com.rich_beluga.richnote.R
 private data class SettingsItem(
     val icon: Painter,
     val title: String,
-    val onClick: () -> Unit
+    val onClick: (() -> Unit)? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,7 +151,7 @@ fun SettingsScreen(
                                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable(onClick = item.onClick)
+                                    .clickable { item.onClick?.invoke() }
                             )
                         }
                     }
