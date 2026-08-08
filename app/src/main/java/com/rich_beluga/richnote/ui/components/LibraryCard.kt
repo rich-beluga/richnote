@@ -33,6 +33,13 @@ data class LibraryLink(
  * ссылок сбоку. Карточка не знает про конкретные библиотеки — только компоновка
  * и типографика, весь контент и ссылки приходят снаружи.
  *
+ * [onClick] — nullable: ripple всегда есть (карточка всегда использует
+ * кликабельный Card — так же, как [InfoCard]), но при `null` тап ничего не
+ * делает — колбэк безопасно no-op'ается (`onClick?.invoke()`), а не убирает
+ * саму кликабельность. Мини-иконки внутри (License/Author) — отдельные
+ * IconButton со своими onClick, вложенный clickable их не перехватывает,
+ * это стандартное поведение Compose.
+ *
  * [shape] приходит готовым (обычно из [groupedCardShape]) — карточка не решает
  * сама, первая/последняя/единственная она в группе, это забота вызывающей стороны.
  */
@@ -44,19 +51,14 @@ fun LibraryCard(
     author: String,
     shape: Shape,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     licenseLinks: List<LibraryLink> = emptyList(),
     authorLinks: List<LibraryLink> = emptyList(),
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
-    Card(
-        shape = shape,
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor
-        )
-    ) {
+    val colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor)
+    val content: @Composable () -> Unit = {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,6 +94,15 @@ fun LibraryCard(
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
+    }
+
+    Card(
+        onClick = { onClick?.invoke() },
+        shape = shape,
+        modifier = modifier,
+        colors = colors
+    ) {
+        content()
     }
 }
 

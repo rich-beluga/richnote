@@ -175,6 +175,7 @@ fun LibrariesScreen(
                     license = item.info.license,
                     author = item.info.author,
                     shape = groupedCardShape(index = index, count = items.size),
+                    onClick = { uriHandler.openUri(item.info.authorUrl) },
                     licenseLinks = item.licenseLinks,
                     authorLinks = item.authorLinks,
                     modifier = Modifier.fillMaxWidth()
