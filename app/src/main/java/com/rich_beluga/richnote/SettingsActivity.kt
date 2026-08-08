@@ -5,6 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,21 +47,36 @@ class SettingsActivity : ComponentActivity() {
                         screen = SettingsScreenState.About
                     }
 
-                    when (screen) {
-                        SettingsScreenState.Settings -> SettingsScreen(
-                            onBackClick = { finish() },
-                            onAboutClick = { screen = SettingsScreenState.About }
-                        )
-                        SettingsScreenState.About -> AboutScreen(
-                            onBackClick = { screen = SettingsScreenState.Settings },
-                            onLibrariesClick = { screen = SettingsScreenState.Libraries }
-                        )
-                        SettingsScreenState.Libraries -> LibrariesScreen(
-                            onBackClick = { screen = SettingsScreenState.About }
-                        )
+                    AnimatedContent(
+                        targetState = screen,
+                        transitionSpec = {
+                            if (targetState.ordinal > initialState.ordinal) {
+                                (slideInHorizontally(initialOffsetX = { width -> width }) + fadeIn())
+                                    .togetherWith(slideOutHorizontally(targetOffsetX = { width -> -width }) + fadeOut())
+                            } else {
+                                (slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn())
+                                    .togetherWith(slideOutHorizontally(targetOffsetX = { width -> width }) + fadeOut())
+                            }
+                        },
+                        label = "settings-navigation"
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            SettingsScreenState.Settings -> SettingsScreen(
+                                onBackClick = { finish() },
+                                onAboutClick = { screen = SettingsScreenState.About }
+                            )
+                            SettingsScreenState.About -> AboutScreen(
+                                onBackClick = { screen = SettingsScreenState.Settings },
+                                onLibrariesClick = { screen = SettingsScreenState.Libraries }
+                            )
+                            SettingsScreenState.Libraries -> LibrariesScreen(
+                                onBackClick = { screen = SettingsScreenState.About }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
