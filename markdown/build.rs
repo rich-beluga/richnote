@@ -14,6 +14,7 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR не задан Cargo"));
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let cmark_src = manifest_dir.join("cmark-gfm/src");
+    let cmark_ext = manifest_dir.join("cmark-gfm/extensions");
 
     write_generated_headers(&out_dir);
 
@@ -47,9 +48,20 @@ fn main() {
         "xml.c",
     ];
 
+    let extension_sources = [
+        "core-extensions.c",
+        "table.c",
+        "strikethrough.c",
+        "tagfilter.c",
+        "tasklist.c",
+        "autolink.c",
+        "ext_scanners.c",
+    ];
+
     let mut build = cc::Build::new();
     build
         .include(&cmark_src)
+        .include(&cmark_ext)
         .include(&out_dir)
         .flag_if_supported("-Wno-unused-parameter")
         .flag_if_supported("-Wno-unused-function");
@@ -57,10 +69,14 @@ fn main() {
     for file in sources {
         build.file(cmark_src.join(file));
     }
+    for file in extension_sources {
+        build.file(cmark_ext.join(file));
+    }
 
     build.compile("cmark-gfm");
 
     println!("cargo:rerun-if-changed={}", cmark_src.display());
+    println!("cargo:rerun-if-changed={}", cmark_ext.display());
     println!("cargo:rerun-if-changed=build.rs");
 }
 
