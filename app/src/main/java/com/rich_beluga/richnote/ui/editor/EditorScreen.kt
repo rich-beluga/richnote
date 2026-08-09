@@ -1,4 +1,4 @@
-package com.rich_beluga.richnote.ui
+package com.rich_beluga.richnote.ui.editor
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -43,11 +43,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.R
+import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 
@@ -56,7 +59,6 @@ import com.rich_beluga.richnote.markdown.MarkdownParser
 fun EditorScreen(
     state: EditorUiState,
     onContentChange: (TextFieldValue) -> Unit,
-    onOpenClick: () -> Unit,
     onSaveClick: () -> Unit,
     onNewClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -90,9 +92,6 @@ fun EditorScreen(
                 actions = {
                     IconButton(onClick = onNewClick) {
                         Icon(Icons.Filled.InsertDriveFile, contentDescription = "Новый файл")
-                    }
-                    IconButton(onClick = onOpenClick) {
-                        Icon(Icons.Filled.FolderOpen, contentDescription = "Открыть")
                     }
                     IconButton(onClick = { showPreview = !showPreview }) {
                         Icon(
@@ -176,7 +175,8 @@ private fun EditorTextArea(
                 onValueChange = onContentChange,
                 onTextLayout = { layoutResult = it },
                 textStyle = TextStyle(
-                    fontFamily = FontFamily.Monospace,
+                    fontFamily = JetBrainsMono,
+                    fontWeight = FontWeight.Normal,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     color = MaterialTheme.colorScheme.onSurface
                 ),

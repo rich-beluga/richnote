@@ -27,21 +27,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.rich_beluga.richnote.core.EditorViewModel
 import com.rich_beluga.richnote.core.FileTreeViewModel
-import com.rich_beluga.richnote.ui.EditorScreen
-import com.rich_beluga.richnote.ui.FileExplorerDrawer
+import com.rich_beluga.richnote.ui.editor.EditorScreen
+import com.rich_beluga.richnote.ui.explorer.FileExplorerDrawer
 import com.rich_beluga.richnote.ui.ManageStoragePermissionDialog
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
-
-    // ACTION_OPEN_DOCUMENT — выбрать существующий файл для чтения/записи
-    private val openDocumentLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.openFile(this, it) }
-    }
 
     // ACTION_CREATE_DOCUMENT — создать новый файл ("Сохранить как" / первое сохранение)
     private val createDocumentLauncher = registerForActivityResult(
@@ -96,7 +89,6 @@ class MainActivity : ComponentActivity() {
                         EditorScreen(
                             state = state,
                             onContentChange = viewModel::onContentChange,
-                            onOpenClick = { openDocumentLauncher.launch(arrayOf("text/*")) },
                             onSaveClick = {
                                 if (state.isNewFile) {
                                     createDocumentLauncher.launch(state.fileName)

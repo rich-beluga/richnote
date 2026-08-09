@@ -1,24 +1,35 @@
 package com.rich_beluga.richnote.markdown
 
-/**
- * Модель распарсенного Markdown-документа. Никакой зависимости от Android/Compose —
- * чистый Kotlin (собирается и тестируется как обычный JVM-код). Слой отрисовки
- * (Compose) лежит отдельно, в ui/MarkdownView.kt, и ничего не знает про сам парсер,
- * кроме этих двух sealed-иерархий.
- */
-
-/** Инлайн-узлы — то, что может встретиться внутри одной строки/параграфа. */
 sealed interface InlineNode {
     data class Text(val value: String) : InlineNode
     data class Bold(val children: List<InlineNode>) : InlineNode
     data class Italic(val children: List<InlineNode>) : InlineNode
-    /** Код внутри `code` НЕ разбирается дальше — по спеке Markdown это буквальный текст. */
     data class Code(val value: String) : InlineNode
+    data class Link(val children: List<InlineNode>, val url: String) : InlineNode
+    data class Image(val alt: String, val url: String) : InlineNode
+    data object LineBreak : InlineNode
+    /** GFM-расширение "strikethrough" (~~текст~~) — первое подключённое GFM-расширение. */
+    data class Strikethrough(val children: List<InlineNode>) : InlineNode
 }
 
-/** Блочные узлы — то, из чего состоит документ построчно/по абзацам. */
+enum class TableAlignment { NONE, LEFT, CENTER, RIGHT }
+
 sealed interface BlockNode {
     data class Paragraph(val inline: List<InlineNode>) : BlockNode
-    /** Разделитель --- / *** / ___ (thematic break в терминах CommonMark). */
+    data class Heading(val level: Int, val inline: List<InlineNode>) : BlockNode
     data object ThematicBreak : BlockNode
+    data class CodeBlock(val text: String, val language: String? = null) : BlockNode
+    data class BlockQuote(val children: List<BlockNode>) : BlockNode
+    data class BulletList(val items: List<List<BlockNode>>) : BlockNode
+    data class OrderedList(val start: Int, val items: List<List<BlockNode>>) : BlockNode
+    /**
+     * GFM-расширение "table". Выравнивание — одно на столбец (у cmark-gfm оно
+     * одинаковое у всех ячеек столбца, хедер и тело не расходятся), поэтому
+     * хранится отдельно от самих ячеек, а не дублируется в каждой из них.
+     */
+    data class Table(
+        val alignments: List<TableAlignment>,
+        val header: List<List<InlineNode>>,
+        val rows: List<List<List<InlineNode>>>
+    ) : BlockNode
 }
