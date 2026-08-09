@@ -61,6 +61,7 @@ import com.rich_beluga.richnote.R
 private data class SettingsItem(
     val icon: Painter,
     val title: String,
+    val description: String,
     val onClick: (() -> Unit)? = null
 )
 
@@ -106,11 +107,13 @@ fun SettingsScreen(
                     SettingsItem(
                         icon = appearanceIcon,
                         title = "Внешний вид",
+                        description = "Тема, цвета, шрифты редактора",
                         onClick = null
                     ),
                     SettingsItem(
                         icon = infoIcon,
                         title = "О приложении",
+                        description = "Версия, лицензии, разработчик",
                         onClick = onAboutClick
                     )
                 )
@@ -142,6 +145,7 @@ fun SettingsScreen(
                         ) {
                             ListItem(
                                 headlineContent = { Text(item.title) },
+                                supportingContent = { Text(item.description) },
                                 leadingContent = {
                                     Icon(item.icon, contentDescription = null)
                                 },

@@ -6,6 +6,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -21,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import com.rich_beluga.richnote.ui.AboutScreen
 import com.rich_beluga.richnote.ui.LibrariesScreen
 import com.rich_beluga.richnote.ui.SettingsScreen
@@ -47,15 +50,22 @@ class SettingsActivity : ComponentActivity() {
                         screen = SettingsScreenState.About
                     }
 
+                    val motionSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+                    val offsetSpec = tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
+
                     AnimatedContent(
                         targetState = screen,
                         transitionSpec = {
                             if (targetState.ordinal > initialState.ordinal) {
-                                (slideInHorizontally(initialOffsetX = { width -> width }) + fadeIn())
-                                    .togetherWith(slideOutHorizontally(targetOffsetX = { width -> -width }) + fadeOut())
+                                (slideInHorizontally(animationSpec = offsetSpec) { width -> width } + fadeIn(motionSpec))
+                                    .togetherWith(
+                                        slideOutHorizontally(animationSpec = offsetSpec) { width -> -width } + fadeOut(motionSpec)
+                                    )
                             } else {
-                                (slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn())
-                                    .togetherWith(slideOutHorizontally(targetOffsetX = { width -> width }) + fadeOut())
+                                (slideInHorizontally(animationSpec = offsetSpec) { width -> -width } + fadeIn(motionSpec))
+                                    .togetherWith(
+                                        slideOutHorizontally(animationSpec = offsetSpec) { width -> width } + fadeOut(motionSpec)
+                                    )
                             }
                         },
                         label = "settings-navigation"
