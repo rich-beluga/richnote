@@ -88,10 +88,12 @@ fun List<InlineNode>.toAnnotatedString(linkColor: Color): AnnotatedString = buil
 private fun headingStyle(level: Int): TextStyle {
     val typography = MaterialTheme.typography
     val base = when (level) {
-        1 -> typography.headlineMedium
-        2 -> typography.headlineSmall
-        3 -> typography.titleLarge
-        4 -> typography.titleMedium
+        1 -> typography.headlineLarge
+        2 -> typography.headlineMedium
+        3 -> typography.headlineSmall
+        4 -> typography.titleLarge
+        5 -> typography.titleMedium
+        6 -> typography.titleSmall
         else -> typography.titleSmall
     }
     return base.copy(fontWeight = FontWeight.Bold)
