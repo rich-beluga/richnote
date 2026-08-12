@@ -30,6 +30,11 @@ val markdownSyntaxRules: List<SyntaxRule> = listOf(
         )
     ),
     SyntaxRule(
+        name = "Bold Italic"
+        regex = Regex("""\*\*\*(.+?)\*\*\*|___(.+?)___"""),
+        style = SpanStyle(fontFamily = JetBrainsMonoItalic, fontWeight = FontWeight.Bold)
+    ),
+    SyntaxRule(
         name = "Bold",
         regex = Regex("""\*\*(.+?)\*\*|__(.+?)__"""),
         style = SpanStyle(fontFamily = JetBrainsMono, fontWeight = FontWeight.Bold)
