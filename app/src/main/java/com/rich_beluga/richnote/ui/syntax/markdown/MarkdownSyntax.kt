@@ -16,46 +16,47 @@ import com.rich_beluga.richnote.ui.syntax.SyntaxRule
 
 val markdownSyntaxRules: List<SyntaxRule> = listOf(
     SyntaxRule(
-        name = "Headline",
+        name = "comment",
+        regex = Regex("""\<!--[\s\S]*?-->"""),
+        style = SpanStyle(color = Color(0xFF7D7D7F), fontFamily = JetBrainsMonoItalic, fontWeight = FontWeight = Normal)
+    ),
+    SyntaxRule(
+        name = "headline",
         regex = Regex("""(?m)^#{1,6}\s"""),
         style = SpanStyle(color = Color(0xFFFF986C))
     ),
     SyntaxRule(
-        name = "Code",
+        name = "code",
         regex = Regex("""`[^`\n]+`"""),
-        style = SpanStyle(
-            color = Color(0xFF00897B),
-            fontFamily = JetBrainsMono,
-            fontWeight = FontWeight.Normal
-        )
+        style = SpanStyle(color = Color(0xFF00897B), fontFamily = JetBrainsMono, fontWeight = FontWeight.Normal)
     ),
     SyntaxRule(
-        name = "Bold Italic",
+        name = "bold italic",
         regex = Regex("""\*\*\*(.+?)\*\*\*|___(.+?)___"""),
         style = SpanStyle(fontFamily = JetBrainsMonoItalic, fontWeight = FontWeight.Bold)
     ),
     SyntaxRule(
-        name = "Bold",
+        name = "bold",
         regex = Regex("""\*\*(.+?)\*\*|__(.+?)__"""),
         style = SpanStyle(fontFamily = JetBrainsMono, fontWeight = FontWeight.Bold)
     ),
     SyntaxRule(
-        name = "Italic",
+        name = "italic",
         regex = Regex("""\*(.+?)\*|_(.+?)_"""),
         style = SpanStyle(fontFamily = JetBrainsMonoItalic, fontWeight = FontWeight.Normal)
     ),
     SyntaxRule(
-        name = "Strikethrough",
+        name = "strikethrough",
         regex = Regex("""~~(.+?)~~"""),
         style = SpanStyle(textDecoration = TextDecoration.LineThrough)
     ),
     SyntaxRule(
-        name = "Points",
+        name = "points",
         regex = Regex("""(?m)^[ \t]*[-+*](?=\s)"""),
         style = SpanStyle(color = Color(0xFFEA5655))
     ),
     SyntaxRule(
-        name = "NumberedList",
+        name = "numbered list",
         regex = Regex("""(?m)^[ \t]*\d+\.(?=\s)"""),
         style = SpanStyle(color = Color(0xFFEA5655))
     )
