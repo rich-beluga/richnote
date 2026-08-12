@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 fun gitShortSha(): String = try {
@@ -22,8 +23,8 @@ android {
         applicationId = "com.rich_beluga.richnote"
         minSdk = 31
         targetSdk = 35
-        versionCode = 20260812
-        versionName = "1.2.0"
+        versionCode = 20260813
+        versionName = "1.3.0"
 
         buildConfigField("String", "GIT_SHA", "\"${gitShortSha()}\"")
     }
@@ -57,4 +58,7 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
