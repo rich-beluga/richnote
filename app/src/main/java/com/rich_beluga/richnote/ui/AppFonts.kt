@@ -5,12 +5,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.rich_beluga.richnote.R
 
-/**
- * JetBrains Mono, вариативный шрифт.
- * Регистрируется несколько раз с разными весами:
- * `Normal`, `Medium`, `Bold` и `ExtraBold`.
- */
-
 val JetBrainsMono = FontFamily(
     Font(
         R.font.jetbrains_mono_regular,
@@ -29,3 +23,21 @@ val JetBrainsMono = FontFamily(
         weight = FontWeight.ExtraBold
     ),
 )
+
+val JetBrainsMonoItalic = FontFamily(
+    Font(
+        R.font.jetbrains_mono_italic,
+        weight = FontWeight.Normal
+    ),
+    Font(
+        R.font.jetbrains_mono_mediumitalic,
+        weight = FontWeight.Medium
+    ),
+    Font(
+        R.font.jetbrains_mono_bolditalic,
+        weight = FontWeight.Bold
+    ),
+    Font(
+        R.font.jetbrains_mono_extrabolditalic,
+        weight = FontWeight.ExtraBold
+    ),

@@ -28,11 +28,6 @@ import com.rich_beluga.richnote.ui.components.LibraryCard
 import com.rich_beluga.richnote.ui.components.LibraryLink
 import com.rich_beluga.richnote.ui.components.groupedCardShape
 
-/**
- * Данные одной библиотеки. Список ниже — реальные зависимости проекта: артефакты
- * из app/build.gradle.kts плюс нативные из markdown/Cargo.toml и вендоренный
- * markdown/cmark-gfm.
- */
 private data class LibraryInfo(
     val title: String,
     val description: String,

@@ -6,14 +6,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 
-/**
- * Показывается, когда нажали на кнопку мини-проводника, а `MANAGE_EXTERNAL_STORAGE`
- * ещё не выдано (см. `MainActivity` — проверка `Environment.isExternalStorageManager()`
- * идёт до открытия шторки, сама шторка/ViewModel про разрешения не знают).
- *
- * `onCancel` — "выйти" (см. вызывающую сторону: `finishAffinity()`, не просто dismiss).
- * `onContinue` — открыть системные настройки выдачи разрешения этому приложению.
- */
 @Composable
 fun ManageStoragePermissionDialog(
     onCancel: () -> Unit,

@@ -12,12 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * currentDirectory/entries — листинг текущей папки. Ничего не знает про Uri/SAF —
- * работает напрямую с java.io.File, поэтому и требует `MANAGE_EXTERNAL_STORAGE`
- * (без него directory.listFiles() на большинстве путей молча вернёт null на
- * Android 11+ из-за scoped storage).
- */
 data class FileTreeUiState(
     val currentDirectory: File = Environment.getExternalStorageDirectory(),
     val entries: List<FileTreeEntry> = emptyList(),
@@ -26,8 +20,6 @@ data class FileTreeUiState(
 
 class FileTreeViewModel : ViewModel() {
 
-    // Мини-проводник специально ограничен корнем внешнего хранилища — вверх выше
-    // него (в /storage/emulated и т.п.) подняться нельзя, это не root-explorer.
     private val rootDirectory: File = Environment.getExternalStorageDirectory()
 
     private val _uiState = MutableStateFlow(FileTreeUiState(currentDirectory = rootDirectory))
@@ -52,7 +44,6 @@ class FileTreeViewModel : ViewModel() {
 
     val canGoUp: Boolean get() = _uiState.value.currentDirectory != rootDirectory
 
-    /** Сбросить проводник обратно в корень — вызывается при открытии шторки заново. */
     fun resetToRoot() {
         if (_uiState.value.currentDirectory != rootDirectory) loadDirectory(rootDirectory)
     }

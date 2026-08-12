@@ -9,20 +9,6 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
-/**
- * Общий движок для всех фигур в этом пакете. Каждая фигура — это просто "сырые"
- * SVG path data (см. комментарий в соответствующем файле), а PathShape превращает
- * их в androidx Shape: сам ничего не знает про цвет/размер/анимацию, только форму.
- * Compose передаёт актуальный Size в createOutline() на каждой раскладке — цвет,
- * размер и всё остальное подставляются уже там, где Shape используется
- * (Modifier.clip(...), Surface(shape = ..., color = ...) и т.п.).
- *
- * Путь парсится один раз лениво (PathParser — тот же механизм, которым Compose
- * сам парсит <path android:pathData="..."> у vector drawable), дальше на каждый
- * createOutline() берётся копия и масштабируется под фактический size — исходник
- * не мутируется, поэтому один и тот же PathShape можно переиспользовать в разных
- * местах с разными размерами одновременно.
- */
 class MaterialShape(
     pathData: String,
     private val referenceSize: Float = ShapesDefaults.ReferenceGrid

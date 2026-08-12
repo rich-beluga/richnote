@@ -20,17 +20,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import com.rich_beluga.richnote.R
 
-/**
- * Иконка по типу файла.
- * Резолвинг только по расширению имени, без чтения содержимого файла и без
- * ContentResolver/MimeTypeMap (это I/O, а резолвер должен быть дешёвым —
- * вызывается на каждый элемент списка при каждой композиции строки).
- *
- * Два источника иконки — Material-иконки (Vector) для большинства категорий и
- * уже готовый кастомный drawable (Resource) для markdown — поэтому результат
- * не голый ImageVector, а обёртка с обоими вариантами; [FileTypeIcon] знает,
- * как отрисовать любой из них.
- */
 sealed interface FileTypeIcon {
     data class Vector(val icon: ImageVector) : FileTypeIcon
     data class Resource(@DrawableRes val id: Int) : FileTypeIcon
@@ -46,8 +35,6 @@ fun FileTypeIcon(icon: FileTypeIcon, contentDescription: String?, modifier: Modi
 
 object FileTypeIcons {
 
-    /** [name] — просто имя файла (entry.name), не весь путь: substringAfterLast
-     *  дешевле и не требует File. Расширение сравнивается без учёта регистра. */
     fun forFile(name: String, isDirectory: Boolean): FileTypeIcon {
         if (isDirectory) return FileTypeIcon.Vector(Icons.Filled.Folder)
 

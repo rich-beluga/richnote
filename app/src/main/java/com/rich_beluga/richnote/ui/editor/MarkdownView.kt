@@ -88,12 +88,10 @@ fun List<InlineNode>.toAnnotatedString(linkColor: Color): AnnotatedString = buil
 private fun headingStyle(level: Int): TextStyle {
     val typography = MaterialTheme.typography
     val base = when (level) {
-        1 -> typography.headlineLarge
-        2 -> typography.headlineMedium
-        3 -> typography.headlineSmall
-        4 -> typography.titleLarge
-        5 -> typography.titleMedium
-        6 -> typography.titleSmall
+        1 -> typography.headlineMedium
+        2 -> typography.headlineSmall
+        3 -> typography.titleLarge
+        4 -> typography.titleMedium
         else -> typography.titleSmall
     }
     return base.copy(fontWeight = FontWeight.Bold)
@@ -168,12 +166,12 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         ) {
-            val minTableWidth = maxWidth // Минимальная ширина - экран устройства
+            val minTableWidth = maxWidth
             Column(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
-                    .width(IntrinsicSize.Max) // Позволяет строкам измерить свой контент
-                    .widthIn(min = minTableWidth) // Растягиваем таблицу на весь экран, если она меньше
+                    .width(IntrinsicSize.Max)
+                    .widthIn(min = minTableWidth)
                     .clip(RoundedCornerShape(8.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
             ) {
@@ -223,11 +221,6 @@ private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAl
     }
 }
 
-/**
- * Базовый отступ 8dp со всех сторон. При явном выравнивании (не NONE) текст
- * прижимается к одному краю ячейки — добавляем на эту сторону чуть больше
- * воздуха (12dp вместо 8dp), чтобы не липло к VerticalDivider/краю таблицы.
- */
 private fun cellPadding(alignment: TableAlignment): PaddingValues = when (alignment) {
     TableAlignment.LEFT -> PaddingValues(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
     TableAlignment.RIGHT -> PaddingValues(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)

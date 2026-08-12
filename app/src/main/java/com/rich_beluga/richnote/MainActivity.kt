@@ -36,7 +36,6 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
 
-    // ACTION_CREATE_DOCUMENT — создать новый файл ("Сохранить как" / первое сохранение)
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/markdown")
     ) { uri ->
@@ -66,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
                     if (showStoragePermissionDialog) {
                         ManageStoragePermissionDialog(
-                            // "Отмена" — выйти, а не просто закрыть диалог.
                             onCancel = { finishAffinity() },
                             onContinue = {
                                 showStoragePermissionDialog = false
@@ -113,9 +111,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION — экран разрешения именно для
-     *  этого приложения. Если недоступен на конкретном OEM/API — фолбэк на общий
-     *  список "Доступ ко всем файлам" без привязки к пакету. */
     private fun openManageStorageSettings() {
         runCatching {
             startActivity(

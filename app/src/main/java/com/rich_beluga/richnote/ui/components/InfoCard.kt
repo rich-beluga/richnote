@@ -20,17 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.ui.JetBrainsMono
 
-/**
- * Небольшая карточка Material 3: иконка слева, справа — заголовок и более
- * мелкое описание строкой ниже. Сама карточка не знает, что за иконка,
- * какой текст или какой цвет — всё это приходит снаружи (AboutScreen),
- * здесь только компоновка и типографика.
- *
- * icon — Painter: подходит и под painterResource(R.drawable...)
- * для своих иконок из res/drawable, и под rememberVectorPainter() для готовых
- * Material-иконок
- */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoCard(

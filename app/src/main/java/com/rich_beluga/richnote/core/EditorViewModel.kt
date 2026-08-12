@@ -12,14 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Состояние экрана редактора. content — то, что видит и правит пользователь,
- * originalContent — снимок на момент последнего open/save, по нему считается isDirty.
- *
- * Специально не храним здесь ничего про подсветку синтаксиса: когда она появится,
- * это будет отдельный слой над content (AnnotatedString/визуальный трансформер),
- * а сама модель данных не изменится.
- */
 data class EditorUiState(
     val uri: Uri? = null,
     val fileName: String = "Untitled.md",
@@ -37,7 +29,6 @@ class EditorViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(EditorUiState())
     val uiState: StateFlow<EditorUiState> = _uiState
 
-    /** Открывает файл по Uri, полученному из ACTION_OPEN_DOCUMENT. */
     fun openFile(context: Context, uri: Uri) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -64,7 +55,6 @@ class EditorViewModel : ViewModel() {
         }
     }
 
-    /** Сохраняет в уже известный Uri (обычная "Сохранить"). */
     fun save(context: Context) {
         val state = _uiState.value
         val uri = state.uri ?: return
@@ -79,7 +69,6 @@ class EditorViewModel : ViewModel() {
         }
     }
 
-    /** Вызывается после ACTION_CREATE_DOCUMENT (первое сохранение нового файла или "Сохранить как"). */
     fun saveAsNewUri(context: Context, uri: Uri) {
         viewModelScope.launch {
             val text = _uiState.value.content.text

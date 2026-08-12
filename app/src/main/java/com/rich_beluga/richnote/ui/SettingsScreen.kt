@@ -165,12 +165,6 @@ fun SettingsScreen(
     }
 }
 
-/**
- * Скругление сегментированных карточек списка (groupedCardShape) — теперь общая
- * функция в ui.components, см. GroupedCardShape.kt (используется и здесь, и в
- * LibrariesScreen).
- */
-
 @Composable
 private fun SettingsHero(modifier: Modifier = Modifier) {
     Box(

@@ -24,18 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.core.FileTreeUiState
 import java.io.File
 
-/**
- * Мини-проводник в боковой шторке — только листинг и выбор файла, никаких
- * операций с файлами (переименование/удаление/копирование). Открывается
- * снаружи через drawerState (см. MainActivity: проверка MANAGE_EXTERNAL_STORAGE
- * идёт ДО открытия, сама шторка ничего не знает про разрешения).
- *
- * Строки списка — свой лёгкий Row, не NavigationDrawerItem: тот тащит анимацию
- * selected-состояния (Surface + animateColorAsState на цвет/форму контейнера),
- * которым мы не пользуемся вообще (selected всегда false), а на директории с
- * сотнями файлов эта неиспользуемая машинерия на каждую строку и была
- * заметной частью лагов.
- */
 @Composable
 fun FileExplorerDrawer(
     drawerState: DrawerState,
@@ -58,8 +46,6 @@ fun FileExplorerDrawer(
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
                 )
 
-                // Толщиной с саму границу — не двигает раскладку при появлении/
-                // исчезновении, просто ложится поверх/под HorizontalDivider.
                 if (fileTreeState.isLoading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 } else {
