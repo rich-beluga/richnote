@@ -50,22 +50,22 @@ class SettingsActivity : ComponentActivity() {
                         screen = SettingsScreenState.About
                     }
 
-                    val motionSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
-                    val offsetSpec = tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
-
                     AnimatedContent(
                         targetState = screen,
                         transitionSpec = {
-                            if (targetState.ordinal > initialState.ordinal) {
-                                (slideInHorizontally(animationSpec = offsetSpec) { width -> width } + fadeIn(motionSpec))
-                                    .togetherWith(
-                                        slideOutHorizontally(animationSpec = offsetSpec) { width -> -width } + fadeOut(motionSpec)
-                                    )
+                            val isForward = targetState.ordinal > initialState.ordinal
+                            val duration = 300
+                            val offsetSpec = tween<IntOffset>(durationMillis = duration, easing = FastOutSlowInEasing)
+                            val fadeSpec = tween<Float>(durationMillis = duration, easing = FastOutSlowInEasing)
+
+                            if (isForward) {
+                                slideInHorizontally(animationSpec = offsetSpec) { width -> width } togetherWith
+                                (slideOutHorizontally(animationSpec = offsetSpec) { width -> (width * -0.3f).toInt() } + fadeOut(animationSpec = fadeSpec))
                             } else {
-                                (slideInHorizontally(animationSpec = offsetSpec) { width -> -width } + fadeIn(motionSpec))
-                                    .togetherWith(
-                                        slideOutHorizontally(animationSpec = offsetSpec) { width -> width } + fadeOut(motionSpec)
-                                    )
+                                (slideInHorizontally(animationSpec = offsetSpec) { width -> (width * -0.3f).toInt() } + fadeIn(animationSpec = fadeSpec)) togetherWith
+                                slideOutHorizontally(animationSpec = offsetSpec) { width -> width }
+                            }.apply {
+                                targetContentZIndex = if (isForward) 1f else -1f
                             }
                         },
                         label = "settings-navigation"
@@ -89,4 +89,3 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 }
-
