@@ -16,6 +16,20 @@ import com.rich_beluga.richnote.ui.syntax.SyntaxRule
 
 val markdownSyntaxRules: List<SyntaxRule> = listOf(
     SyntaxRule(
+        name = "codeblock",
+        regex = Regex("""(?m)^ {0,3}(```+)(?!`)([^`\n]*?\n)([\s\S]*?)(^ {0,3}\1`*|(?-m)$)"""),
+        style = SpanStyle(
+            color = Color(0xFFFFCB6B)
+        )
+    ),
+    SyntaxRule(
+        name = "codeblock",
+        regex = Regex("""(?m)^ {0,3}(~~~+)(?!~)([^~\n]*?\n)([\s\S]*?)(^ {0,3}\1~*|(?-m)$)"""),
+        style = SpanStyle(
+            color = Color(0xFFFFCB6B)
+        )
+    ),
+    SyntaxRule(
         name = "comment",
         regex = Regex("""\<!--[\s\S]*?-->"""),
         style = SpanStyle(
