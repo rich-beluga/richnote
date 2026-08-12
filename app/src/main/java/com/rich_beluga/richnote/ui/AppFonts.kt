@@ -41,3 +41,4 @@ val JetBrainsMonoItalic = FontFamily(
         R.font.jetbrains_mono_extrabolditalic,
         weight = FontWeight.ExtraBold
     ),
+)
