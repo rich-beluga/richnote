@@ -37,7 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -82,36 +84,61 @@ fun AboutScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "RichNote",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontFamily = JetBrainsMono,
-                    fontWeight = FontWeight.ExtraBold
+            Card(
+                shape = groupedCardShape(index = 0, count = 1),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
-                textAlign = TextAlign.Center
-            )
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp, horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_cat),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            blendMode = BlendMode.SrcIn
+                        ),
+                        modifier = Modifier.size(120.dp)
+                    )
 
-            Text(
-                text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) | ${BuildConfig.GIT_SHA}",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = JetBrainsMono,
-                    fontWeight = FontWeight.Normal
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                    Text(
+                        text = "RichNote",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontFamily = JetBrainsMono,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        textAlign = TextAlign.Center
+                    )
 
-            Text(
-                text = "A feature-rich note-taking app based on Markdown",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = JetBrainsMono,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                    Text(
+                        text = "v${BuildConfig.VERSION_NAME} | ${BuildConfig.GIT_SHA}",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = JetBrainsMono,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    Text(
+                        text = "A feature-rich note-taking app based on Markdown",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = JetBrainsMono,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
 
             Text(
                 text = "Developer",
@@ -140,7 +167,7 @@ fun AboutScreen(
             )
 
             Text(
-                text = "Kotlin/Rust developer",
+                text = "nya :3",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Normal
@@ -150,9 +177,7 @@ fun AboutScreen(
             )
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp),
+                modifier = Modifier.padding(top = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 InfoCard(
@@ -163,8 +188,7 @@ fun AboutScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     onClick = {
                         uriHandler.openUri("https://github.com/rich-beluga/richnote")
-                    },
-                    modifier = Modifier.weight(1f)
+                    }
                 )
                 InfoCard(
                     icon = painterResource(R.drawable.ic_license),
@@ -172,8 +196,7 @@ fun AboutScreen(
                     description = "License",
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onClick = null,
-                    modifier = Modifier.weight(1f)
+                    onClick = null
                 )
             }
 
@@ -184,14 +207,9 @@ fun AboutScreen(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 onClick = null,
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp)
             )
 
-            // Отдельная менюшка: тот же паттерн сегментированных MD3-карточек, что
-            // и в SettingsScreen (Card + ListItem + шеврон). Один пункт в группе —
-            // groupedCardShape(0, 1) даёт полное скругление со всех сторон.
             Card(
                 shape = groupedCardShape(index = 0, count = 1),
                 colors = CardDefaults.cardColors(
