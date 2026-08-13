@@ -93,6 +93,13 @@ val markdownSyntaxRules: List<SyntaxRule> = listOf(
         )
     ),
     SyntaxRule(
+        name = "divider",
+        regex = Regex("""(?m)^ {0,3}(\* *\* *\* *[* ]*|- *- *- *[- ]*|_ *_ *_ *[_ ]*)$"""),
+        style = SpanStyle(
+            color = Color (0xFFFF9ACC)
+        )
+    ),
+    SyntaxRule(
         name = "numbered list",
         regex = Regex("""(?m)^[ \t]*\d+\.(?=\s)"""),
         style = SpanStyle(
