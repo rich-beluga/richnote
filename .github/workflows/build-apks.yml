@@ -135,11 +135,22 @@ jobs:
       - name: Assemble release APK
         run: ./gradlew :app:assembleRelease --no-daemon
 
-      - name: Upload release APK (unsigned)
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v2.0.0
+        id: sign_apk
+        with:
+          releaseDir: app/build/outputs/apk/release
+          signingKey: ${{ secrets.KEYSTORE }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: 35.0.0
+
+      - name: Upload release APK
         uses: actions/upload-artifact@v7
         with:
           name: richnote-release-apk
-          path: app/build/outputs/apk/release/*.apk
+          path: ${{steps.sign_apk.outputs.signedFile}}
           if-no-files-found: error
           retention-days: 14
 
@@ -158,3 +169,4 @@ jobs:
             exit 1
           fi
           echo "Все три job (native, debug, release) прошли успешно."
+          
