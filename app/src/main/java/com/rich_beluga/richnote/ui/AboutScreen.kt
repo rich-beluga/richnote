@@ -1,14 +1,20 @@
 package com.rich_beluga.richnote.ui
 
 import android.graphics.BitmapFactory
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -33,14 +39,20 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -49,10 +61,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.Morph
 import com.rich_beluga.richnote.BuildConfig
 import com.rich_beluga.richnote.ui.components.InfoCard
 import com.rich_beluga.richnote.ui.components.groupedCardShape
+import com.rich_beluga.richnote.ui.shapes.morphCycleShapes
 import com.rich_beluga.richnote.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,15 +113,7 @@ fun AboutScreen(
                         .padding(vertical = 20.dp, horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_cat),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            blendMode = BlendMode.SrcIn
-                        ),
-                        modifier = Modifier.size(120.dp)
-                    )
+                    MorphingCatBadge()
 
                     Text(
                         text = "RichNote",
@@ -235,6 +242,64 @@ fun AboutScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun MorphingCatBadge(modifier: Modifier = Modifier) {
+    var shapeIndex by remember { mutableStateOf(0) }
+    val morph = remember(shapeIndex) {
+        Morph(
+            morphCycleShapes[shapeIndex],
+            morphCycleShapes[(shapeIndex + 1) % morphCycleShapes.size]
+        )
+    }
+    val progress = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    val shapeColor = MaterialTheme.colorScheme.primary
+
+    Box(
+        modifier = modifier
+            .size(120.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape)
+            .clickable(enabled = !progress.isRunning) {
+                scope.launch {
+                    progress.snapTo(0f)
+                    progress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                    )
+                    shapeIndex = (shapeIndex + 1) % morphCycleShapes.size
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(24.dp)
+                .drawWithCache {
+                    val path = morph.toPath(progress = progress.value).asComposePath()
+                    val matrix = Matrix()
+                    matrix.scale(x = size.minDimension / 2f, y = size.minDimension / 2f)
+                    path.transform(matrix)
+                    onDrawBehind {
+                        translate(left = size.width / 2f, top = size.height / 2f) {
+                            drawPath(path, color = shapeColor)
+                        }
+                    }
+                }
+        )
+
+        Image(
+            painter = painterResource(R.drawable.ic_cat),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colorScheme.onPrimary,
+                blendMode = BlendMode.SrcIn
+            ),
+            modifier = Modifier.size(56.dp)
+        )
     }
 }
 
