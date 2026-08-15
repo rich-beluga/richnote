@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -39,6 +38,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.toPath
 import com.rich_beluga.richnote.BuildConfig
 import com.rich_beluga.richnote.ui.components.InfoCard
 import com.rich_beluga.richnote.ui.components.groupedCardShape
@@ -276,7 +278,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .fillMaxSize()
                 .padding(24.dp)
                 .drawWithCache {
                     val path = morph.toPath(progress = progress.value).asComposePath()
