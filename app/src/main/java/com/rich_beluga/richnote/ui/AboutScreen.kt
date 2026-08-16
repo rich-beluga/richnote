@@ -83,7 +83,8 @@ class MorphPolygonShape(
         if (morph == null) {
             return Outline.Rectangle(Rect(0f, 0f, size.width, size.height))
         }
-        val path = morph.toPath(progress = progress).asAndroidPath()
+
+        val path = morph.toPath(progress = progress) 
         val matrix = android.graphics.Matrix().apply {
             setScale(size.minDimension / 2f, size.minDimension / 2f)
             postTranslate(size.width / 2f, size.height / 2f)
