@@ -21,11 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,37 +36,63 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.toPath
 import com.rich_beluga.richnote.BuildConfig
+import com.rich_beluga.richnote.R
 import com.rich_beluga.richnote.ui.components.InfoCard
 import com.rich_beluga.richnote.ui.components.groupedCardShape
 import com.rich_beluga.richnote.ui.shapes.morphCycleShapes
-import com.rich_beluga.richnote.R
 import kotlinx.coroutines.launch
+
+class MorphPolygonShape(
+    private val morph: Morph?,
+    private val progress: Float
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        if (morph == null) {
+            return Outline.Rectangle(Rect(0f, 0f, size.width, size.height))
+        }
+        val path = morph.toPath(progress = progress).asAndroidPath()
+        val matrix = android.graphics.Matrix().apply {
+            setScale(size.minDimension / 2f, size.minDimension / 2f)
+            postTranslate(size.width / 2f, size.height / 2f)
+        }
+        val transformedPath = android.graphics.Path()
+        path.transform(matrix, transformedPath)
+        return Outline.Generic(transformedPath.asComposePath())
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -249,63 +272,56 @@ fun AboutScreen(
 
 @Composable
 private fun MorphingCatBadge(modifier: Modifier = Modifier) {
-    var shapeIndex by remember { mutableStateOf(0) }
-    val morph = remember(shapeIndex) {
-        runCatching {
-            Morph(
-                morphCycleShapes[shapeIndex],
-                morphCycleShapes[(shapeIndex + 1) % morphCycleShapes.size]
-            )
-        }.getOrNull()
-    }
+    var shapeIndex by remember { mutableIntStateOf(0) }
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
+
+    val currentShape = morphCycleShapes[shapeIndex]
+    val nextShape = morphCycleShapes[(shapeIndex + 1) % morphCycleShapes.size]
+
+    val morph = remember(currentShape, nextShape) {
+        runCatching { Morph(currentShape, nextShape) }.getOrNull()
+    }
+
     val shapeColor = MaterialTheme.colorScheme.surfaceContainerHigh
+
+    val morphedShape = remember(morph, progress.value) {
+        MorphPolygonShape(morph, progress.value)
+    }
 
     Box(
         modifier = modifier
             .size(120.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape)
-            .clickable(enabled = morph != null && !progress.isRunning) {
-                scope.launch {
-                    progress.snapTo(0f)
-                    progress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-                    )
-                    shapeIndex = (shapeIndex + 1) % morphCycleShapes.size
-                }
-            },
+            .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        if (morph != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp)
-                    .drawWithCache {
-                        val path = morph.toPath(progress = progress.value).asComposePath()
-                        val matrix = Matrix()
-                        matrix.scale(x = size.minDimension / 2f, y = size.minDimension / 2f)
-                        path.transform(matrix)
-                        onDrawBehind {
-                            translate(left = size.width / 2f, top = size.height / 2f) {
-                                drawPath(path, color = shapeColor)
-                            }
-                        }
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(morphedShape)
+                .background(shapeColor)
+                .clickable(enabled = morph != null && !progress.isRunning) {
+                    scope.launch {
+                        progress.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                        )
+                        shapeIndex = (shapeIndex + 1) % morphCycleShapes.size
+                        progress.snapTo(0f)
                     }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_cat),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = MaterialTheme.colorScheme.primary,
+                    blendMode = BlendMode.SrcIn
+                ),
+                modifier = Modifier.size(40.dp)
             )
         }
-
-        Image(
-            painter = painterResource(R.drawable.ic_cat),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(
-                color = MaterialTheme.colorScheme.primary,
-                blendMode = BlendMode.SrcIn
-            ),
-            modifier = Modifier.size(56.dp)
-        )
     }
 }
 
