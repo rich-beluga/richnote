@@ -301,7 +301,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_cat),
             contentDescription = null,
             colorFilter = ColorFilter.tint(
-                color = MaterialTheme.colorScheme.Primary,
+                color = MaterialTheme.colorScheme.primary,
                 blendMode = BlendMode.SrcIn
             ),
             modifier = Modifier.size(56.dp)
