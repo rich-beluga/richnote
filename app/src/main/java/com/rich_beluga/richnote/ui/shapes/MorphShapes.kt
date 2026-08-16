@@ -5,7 +5,7 @@ import androidx.graphics.shapes.RoundedPolygon
 
 fun roundedPolygonFromSvgPath(
     pathData: String,
-    acceptableError: Float = 2f
+    acceptableError: Float = 0.05f
 ): RoundedPolygon {
     val androidPath = PathParser.createPathFromPathData(pathData)
     val approx = androidPath.approximate(acceptableError)

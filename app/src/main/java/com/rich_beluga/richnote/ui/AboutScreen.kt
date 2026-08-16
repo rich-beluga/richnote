@@ -260,7 +260,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
     }
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-    val shapeColor = MaterialTheme.colorScheme.primary
+    val shapeColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
     Box(
         modifier = modifier
@@ -301,7 +301,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_cat),
             contentDescription = null,
             colorFilter = ColorFilter.tint(
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.Primary,
                 blendMode = BlendMode.SrcIn
             ),
             modifier = Modifier.size(56.dp)
