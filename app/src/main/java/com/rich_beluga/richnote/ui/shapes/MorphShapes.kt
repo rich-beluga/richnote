@@ -5,20 +5,31 @@ import androidx.graphics.shapes.RoundedPolygon
 
 fun roundedPolygonFromSvgPath(
     pathData: String,
-    acceptableError: Float = 0.5f
+    acceptableError: Float = 2f
 ): RoundedPolygon {
     val androidPath = PathParser.createPathFromPathData(pathData)
     val approx = androidPath.approximate(acceptableError)
 
-    val rawVertices = FloatArray((approx.size / 3) * 2)
-    var targetIndex = 0
+    val points = ArrayList<Float>(approx.size)
     for (i in approx.indices step 3) {
-        rawVertices[targetIndex++] = approx[i + 1] // x
-        rawVertices[targetIndex++] = approx[i + 2] // y
+        points.add(approx[i + 1]) // x
+        points.add(approx[i + 2]) // y
     }
 
-    val normalized = normalizeVertices(rawVertices)
-    return RoundedPolygon(vertices = normalized)
+    if (points.size >= 4) {
+        val firstX = points[0]
+        val firstY = points[1]
+        val lastX = points[points.size - 2]
+        val lastY = points[points.size - 1]
+        val dx = firstX - lastX
+        val dy = firstY - lastY
+        if (dx * dx + dy * dy < 1e-3f) {
+            points.removeAt(points.size - 1)
+            points.removeAt(points.size - 1)
+        }
+    }
+
+    return RoundedPolygon(vertices = normalizeVertices(points.toFloatArray()))
 }
 
 private fun normalizeVertices(vertices: FloatArray): FloatArray {

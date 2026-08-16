@@ -251,10 +251,12 @@ fun AboutScreen(
 private fun MorphingCatBadge(modifier: Modifier = Modifier) {
     var shapeIndex by remember { mutableStateOf(0) }
     val morph = remember(shapeIndex) {
-        Morph(
-            morphCycleShapes[shapeIndex],
-            morphCycleShapes[(shapeIndex + 1) % morphCycleShapes.size]
-        )
+        runCatching {
+            Morph(
+                morphCycleShapes[shapeIndex],
+                morphCycleShapes[(shapeIndex + 1) % morphCycleShapes.size]
+            )
+        }.getOrNull()
     }
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
@@ -264,7 +266,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
         modifier = modifier
             .size(120.dp)
             .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape)
-            .clickable(enabled = !progress.isRunning) {
+            .clickable(enabled = morph != null && !progress.isRunning) {
                 scope.launch {
                     progress.snapTo(0f)
                     progress.animateTo(
@@ -276,22 +278,24 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
             },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-                .drawWithCache {
-                    val path = morph.toPath(progress = progress.value).asComposePath()
-                    val matrix = Matrix()
-                    matrix.scale(x = size.minDimension / 2f, y = size.minDimension / 2f)
-                    path.transform(matrix)
-                    onDrawBehind {
-                        translate(left = size.width / 2f, top = size.height / 2f) {
-                            drawPath(path, color = shapeColor)
+        if (morph != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .drawWithCache {
+                        val path = morph.toPath(progress = progress.value).asComposePath()
+                        val matrix = Matrix()
+                        matrix.scale(x = size.minDimension / 2f, y = size.minDimension / 2f)
+                        path.transform(matrix)
+                        onDrawBehind {
+                            translate(left = size.width / 2f, top = size.height / 2f) {
+                                drawPath(path, color = shapeColor)
+                            }
                         }
                     }
-                }
-        )
+            )
+        }
 
         Image(
             painter = painterResource(R.drawable.ic_cat),
