@@ -292,13 +292,13 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .size(120.dp)
+            .size(140.dp)
             .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .size(72.dp)
+                .size(120.dp)
                 .clip(morphedShape)
                 .background(shapeColor)
                 .clickable(enabled = morph != null && !progress.isRunning) {
@@ -320,7 +320,7 @@ private fun MorphingCatBadge(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.primary,
                     blendMode = BlendMode.SrcIn
                 ),
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(100.dp)
             )
         }
     }
