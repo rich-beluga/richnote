@@ -7,28 +7,78 @@ object FileMimeGuard {
     private val blockedMimePrefixes = listOf("image/", "audio/", "video/")
 
     private val blockedMimeTypes = setOf(
-        "application/zip",
-        "application/x-7z-compressed",
-        "application/x-rar-compressed",
-        "application/vnd.rar",
-        "application/x-tar",
+        "application/octet-stream",
         "application/gzip",
-        "application/x-gzip",
+        "application/x-bzip",
         "application/x-bzip2",
-        "application/vnd.android.package-archive",
-        "application/pdf",
-        "application/x-executable",
-        "application/x-sharedlib",
+        "application/zstd",
+        "application/zip",
+        "application/vnd.rar",
+        "application/x-7z-compressed",
+        "application/x-tar",
+        "application/x-freearc",
         "application/java-archive",
-        "application/octet-stream"
+        "application/vnd.android.package-archive",
+        "application/x-apple-diskimage",
+        "application/x-iso9660-image",
+        "application/vnd.ms-cab-compressed",
+        "application/wasm",
+        "application/pdf",
+        "application/epub+zip"
     )
 
     private val blockedExtensions = setOf(
-        "zip", "rar", "7z", "tar", "gz", "tgz", "xz", "bz2",
-        "apk", "aab", "exe", "dll", "so", "jar", "aar", "iso", "dmg", "class",
-        "png", "jpg", "jpeg", "gif", "webp", "bmp", "ico",
-        "mp3", "wav", "ogg", "flac", "m4a", "mp4", "mkv", "avi", "mov", "webm",
-        "pdf"
+        // Archives / compression
+        "zip", "rar", "7z",
+        "tar", "gz", "tgz", "bz", "bz2",
+        "xz", "txz", "zst", "lz", "lz4",
+        "lzh", "cab", "arj", "arc",
+        "ace", "z", "cpio",
+        "jar", "war", "ear", "aar",
+        "apk", "apks", "xapk",
+
+        // Disk / filesystem images
+        "iso", "img", "raw", "dd",
+        "dmg", "sparseimage", "vhd", "vhdx",
+        "vmdk", "qcow", "qcow2", "ova", "ovf",
+
+        // Native / executable
+        "exe", "dll", "sys", "scr",
+        "msi", "com", "so", "dylib",
+        "elf", "a", "o", "obj", "ko",
+        "class", "dex", "odex", "vdex", "cdex",
+
+        // Windows / binary document formats
+        "doc", "docx", "xls", "xlsx",
+        "ppt", "pptx", "xlsm", "xltx",
+        "docm", "dotx", "pptm", "potx",
+
+        // Media
+        "png", "jpg", "jpeg", "gif", "webp",
+        "bmp", "ico", "tif", "tiff",
+        "heic", "heif", "avif", "jxl",
+        "cr2", "cr3", "nef", "arw", "dng",
+        "mp3", "wav", "ogg", "oga", "opus",
+        "flac", "m4a", "aac", "wma",
+        "aiff", "aif", "amr", "mid", "midi",
+        "ape", "wv", "mp4", "m4v", "mkv",
+        "webm", "avi", "mov", "wmv", "flv",
+        "mpeg", "mpg", "mpe", "3gp", "3g2",
+        "ts", "mts", "m2ts", "vob",
+
+        // Documents that shouldn't be treated as Markdown/text
+        "pdf", "epub", "djvu", "chm",
+
+        // Database / binary data
+        "db", "sqlite", "sqlite3",
+        "mdb", "accdb", "dbf",
+
+        // Fonts
+        "ttf", "otf", "woff", "woff2",
+
+        // Other binary formats
+        "dat", "pak", "bin", "pdb", "dmp",
+        "pcap", "pcapng", "wasm"
     )
 
     fun isBlocked(fileName: String): Boolean {
