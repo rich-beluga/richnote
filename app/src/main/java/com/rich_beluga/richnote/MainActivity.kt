@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.rich_beluga.richnote.core.EditorViewModel
+import com.rich_beluga.richnote.core.FileMimeGuard
 import com.rich_beluga.richnote.core.FileTreeViewModel
 import com.rich_beluga.richnote.ui.editor.EditorScreen
 import com.rich_beluga.richnote.ui.explorer.FileExplorerDrawer
 import com.rich_beluga.richnote.ui.ManageStoragePermissionDialog
+import com.rich_beluga.richnote.ui.UnsupportedFileDialog
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val coroutineScope = rememberCoroutineScope()
                     var showStoragePermissionDialog by remember { mutableStateOf(false) }
+                    var showUnsupportedFileDialog by remember { mutableStateOf(false) }
 
                     if (showStoragePermissionDialog) {
                         ManageStoragePermissionDialog(
@@ -73,6 +76,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    if (showUnsupportedFileDialog) {
+                        UnsupportedFileDialog(
+                            title = "Файл не поддерживается",
+                            message = "Данный файл невозможно открыть в текстовом редакторе!" +
+                                "Попробуйте открыть файл в другом приложении."
+                            confirmButtonText = "Закрыть",
+                            onDismiss = { showUnsupportedFileDialog = false }
+                        )
+                    }
+
                     FileExplorerDrawer(
                         drawerState = drawerState,
                         fileTreeState = fileTreeState,
@@ -80,8 +93,12 @@ class MainActivity : ComponentActivity() {
                         onNavigateUp = fileTreeViewModel::goUp,
                         canGoUp = fileTreeViewModel.canGoUp,
                         onFileSelected = { file ->
-                            viewModel.openFile(this, Uri.fromFile(file))
-                            coroutineScope.launch { drawerState.close() }
+                            if (FileMimeGuard.isBlocked(file.name)) {
+                                showUnsupportedFileDialog = true
+                            } else {
+                                viewModel.openFile(this, Uri.fromFile(file))
+                                coroutineScope.launch { drawerState.close() }
+                            }
                         }
                     ) {
                         EditorScreen(
