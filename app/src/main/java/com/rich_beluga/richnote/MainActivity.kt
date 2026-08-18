@@ -79,8 +79,9 @@ class MainActivity : ComponentActivity() {
                     if (showUnsupportedFileDialog) {
                         UnsupportedFileDialog(
                             title = "Файл не поддерживается",
-                            message = "Архивы и бинарные файлы нельзя открыть в текстовом редакторе.",
-                            confirmButtonText = "Понятно",
+                            message = "Данный файл невозможно открыть в текстовом редакторе!" +
+                                "Попробуйте открыть файл в другом приложении."
+                            confirmButtonText = "Закрыть",
                             onDismiss = { showUnsupportedFileDialog = false }
                         )
                     }
