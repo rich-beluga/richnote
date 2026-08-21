@@ -8,3 +8,6 @@
 /captures
 .externalNativeBuild/
 .cxx/
+
+# OpenCode files
+AGENTS.md
