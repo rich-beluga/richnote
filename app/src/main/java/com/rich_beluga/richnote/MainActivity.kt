@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                         UnsupportedFileDialog(
                             title = "Файл не поддерживается",
                             message = "Данный файл невозможно открыть в текстовом редакторе!" +
-                                "Попробуйте открыть файл в другом приложении."
+                                "Попробуйте открыть файл в другом приложении.",
                             confirmButtonText = "Закрыть",
                             onDismiss = { showUnsupportedFileDialog = false }
                         )
