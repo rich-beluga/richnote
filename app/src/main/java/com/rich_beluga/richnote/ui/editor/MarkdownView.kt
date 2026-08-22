@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -41,6 +42,7 @@ import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
 import com.rich_beluga.richnote.markdown.TableAlignment
 import com.rich_beluga.richnote.ui.JetBrainsMono
+import com.rich_beluga.richnote.ui.syntax.CodeLanguages
 
 private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkColor: Color) {
     for (node in nodes) {
@@ -213,8 +215,11 @@ fun MarkdownBlockView(
                 .horizontalScroll(rememberScrollState())
                 .padding(12.dp)
         ) {
+            val highlightedCode = remember(block.text, block.language) {
+                CodeLanguages.highlight(block.language, block.text)
+            }
             Text(
-                text = block.text,
+                text = highlightedCode,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Normal

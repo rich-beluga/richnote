@@ -180,7 +180,12 @@ object MarkdownParser {
     private fun codeBlockFrom(pre: HtmlNode.Element): BlockNode.CodeBlock {
         val codeEl = pre.children.filterIsInstance<HtmlNode.Element>().firstOrNull { it.tag == "code" }
         val text = codeEl?.children.orEmpty().filterIsInstance<HtmlNode.Text>().joinToString("") { it.text }
-        val language = codeEl?.attrs?.get("class")?.removePrefix("language-")
+        val language = codeEl?.attrs?.get("class")
+            ?.trim()
+            ?.split(Regex("\\s+"))
+            ?.firstOrNull()
+            ?.removePrefix("language-")
+            ?.takeIf { it.isNotEmpty() }
         return BlockNode.CodeBlock(text.removeSuffix("\n"), language)
     }
 
