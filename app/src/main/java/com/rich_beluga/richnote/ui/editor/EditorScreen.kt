@@ -1,6 +1,5 @@
 package com.rich_beluga.richnote.ui.editor
 
-import androidx.compose.foundation.BringIntoViewRequester
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
