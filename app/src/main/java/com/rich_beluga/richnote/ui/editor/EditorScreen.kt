@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -174,17 +175,28 @@ private fun EditorStatsBar(state: EditorUiState) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (stats.hasDiff) {
-                Text(
-                    text = buildString {
-                        append("+${stats.added}")
-                        append(" −${stats.removed}")
-                        if (stats.changed > 0) append(" ~${stats.changed}")
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Medium,
-                    color = if (stats.hasDiff) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "+${stats.added}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = DiffAddedColor
+                    )
+                    Text(
+                        text = "−${stats.removed}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = DiffRemovedColor
+                    )
+                    if (stats.changed > 0) {
+                        Text(
+                            text = "~${stats.changed}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = DiffChangedColor
+                        )
+                    }
+                }
             }
         }
     }
@@ -248,6 +260,10 @@ private fun MarkdownPreview(text: String, baseDir: String?) {
 // папка открытой заметки — база для относительных путей картинок
 private fun previewBaseDir(uri: android.net.Uri?): String? =
     uri?.takeIf { it.scheme == "file" }?.path?.let { File(it).parent }
+
+private val DiffAddedColor = Color(0xFFEA5655)
+private val DiffRemovedColor = Color(0xFF6AAB73)
+private val DiffChangedColor = Color(0xFFFFB86C)
 
 @Composable
 private fun EditorTextArea(
