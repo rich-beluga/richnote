@@ -9,6 +9,7 @@ sealed interface InlineNode {
     data class Image(val alt: String, val url: String) : InlineNode
     data object LineBreak : InlineNode
     data class Strikethrough(val children: List<InlineNode>) : InlineNode
+    data class TaskCheckbox(val checked: Boolean) : InlineNode
 }
 
 enum class TableAlignment { NONE, LEFT, CENTER, RIGHT }

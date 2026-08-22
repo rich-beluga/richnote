@@ -54,7 +54,7 @@ extern "C" {
 
 const CMARK_OPT_UNSAFE: c_int = 1 << 17;
 
-const ENABLED_EXTENSIONS: &[&str] = &["table", "strikethrough"];
+const ENABLED_EXTENSIONS: &[&str] = &["table", "strikethrough", "tasklist"];
 
 static REGISTER_EXTENSIONS: Once = Once::new();
 
@@ -146,6 +146,19 @@ mod tests {
     fn renders_strikethrough() {
         let html = render_html("this is ~~gone~~ text").unwrap();
         assert!(html.contains("<del>gone</del>"), "html: {html}");
+    }
+
+    #[test]
+    fn renders_task_list() {
+        let html = render_html("- [ ] todo\n- [x] done\n").unwrap();
+        assert!(
+            html.contains("<input type=\"checkbox\" disabled=\"\" />"),
+            "html: {html}"
+        );
+        assert!(
+            html.contains("<input type=\"checkbox\" checked=\"\" disabled=\"\" />"),
+            "html: {html}"
+        );
     }
 
     #[test]

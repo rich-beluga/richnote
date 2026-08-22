@@ -235,6 +235,9 @@ object MarkdownParser {
             )
             "a" -> listOf(InlineNode.Link(childrenToInline(node.children), node.attrs["href"].orEmpty()))
             "img" -> listOf(imageInline(node.attrs))
+            "input" -> listOf(
+                InlineNode.TaskCheckbox(checked = node.attrs.containsKey("checked"))
+            )
             "br" -> listOf(InlineNode.LineBreak)
             "del" -> listOf(InlineNode.Strikethrough(childrenToInline(node.children)))
             in DROP_TAGS -> emptyList()
