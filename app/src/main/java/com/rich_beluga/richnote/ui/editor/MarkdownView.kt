@@ -95,6 +95,11 @@ private fun AnnotatedString.Builder.appendInline(
             ) {
                 appendInline(node.children, linkColor, linkListener)
             }
+            is InlineNode.TaskCheckbox -> if (node.checked) {
+                withStyle(SpanStyle(color = linkColor)) { append("☑ ") }
+            } else {
+                withStyle(SpanStyle(color = Color(0xFF7D7D7F))) { append("☐ ") }
+            }
             InlineNode.LineBreak -> append("\n")
         }
     }
@@ -371,9 +376,10 @@ private fun ListItemRow(marker: String, children: List<BlockNode>, baseDir: Stri
         Text(
             text = marker,
             style = MaterialTheme.typography.bodyLarge,
+            // абзац пункта имеет вертикальный отступ 4.dp — выравниваем маркер с первой строкой
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(end = 8.dp)
+                .padding(top = 4.dp, end = 8.dp)
         )
         Column(modifier = Modifier.fillMaxWidth()) {
             children.forEach { child -> MarkdownBlockView(child, baseDir = baseDir) }
