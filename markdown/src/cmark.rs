@@ -52,7 +52,7 @@ extern "C" {
     fn free(ptr: *mut c_void);
 }
 
-const CMARK_OPT_SAFE: c_int = 1 << 3;
+const CMARK_OPT_UNSAFE: c_int = 1 << 17;
 
 const ENABLED_EXTENSIONS: &[&str] = &["table", "strikethrough"];
 
@@ -64,7 +64,7 @@ pub fn render_html(markdown: &str) -> Option<String> {
     let bytes = markdown.as_bytes();
 
     unsafe {
-        let parser = cmark_parser_new(CMARK_OPT_SAFE);
+        let parser = cmark_parser_new(CMARK_OPT_UNSAFE);
         if parser.is_null() {
             return None;
         }
@@ -87,7 +87,7 @@ pub fn render_html(markdown: &str) -> Option<String> {
         }
 
         let extensions = cmark_parser_get_syntax_extensions(parser);
-        let html_ptr = cmark_render_html(doc, CMARK_OPT_SAFE, extensions);
+        let html_ptr = cmark_render_html(doc, CMARK_OPT_UNSAFE, extensions);
 
         cmark_node_free(doc);
         cmark_parser_free(parser);
@@ -121,9 +121,15 @@ mod tests {
     }
 
     #[test]
-    fn escapes_raw_html_in_safe_mode() {
-        let html = render_html("<script>alert(1)</script>").unwrap();
-        assert!(!html.contains("<script>"), "html: {html}");
+    fn passes_raw_html_in_unsafe_mode() {
+        let html = render_html("<img src=\"/home/test.png\" alt=\"image\" />").unwrap();
+        assert!(html.contains("<img src=\"/home/test.png\""), "html: {html}");
+    }
+
+    #[test]
+    fn renders_markdown_image() {
+        let html = render_html("![image](/home/test.png)").unwrap();
+        assert!(html.contains("<img src=\"/home/test.png\" alt=\"image\" />"), "html: {html}");
     }
 
     #[test]

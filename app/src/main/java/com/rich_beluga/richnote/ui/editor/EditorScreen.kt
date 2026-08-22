@@ -54,6 +54,7 @@ import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 import com.rich_beluga.richnote.ui.syntax.markdown.MarkdownVisualTransformation
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,7 +121,10 @@ fun EditorScreen(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                showPreview -> MarkdownPreview(text = state.content.text)
+                showPreview -> MarkdownPreview(
+                    text = state.content.text,
+                    baseDir = previewBaseDir(state.uri)
+                )
                 else -> EditorTextArea(state = state, onContentChange = onContentChange)
             }
         }
@@ -128,16 +132,21 @@ fun EditorScreen(
 }
 
 @Composable
-private fun MarkdownPreview(text: String) {
+private fun MarkdownPreview(text: String, baseDir: String?) {
     val blocks = remember(text) { MarkdownParser.parse(text) }
     MarkdownDocumentView(
         blocks = blocks,
+        baseDir = baseDir,
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     )
 }
+
+// папка открытой заметки — база для относительных путей картинок
+private fun previewBaseDir(uri: android.net.Uri?): String? =
+    uri?.takeIf { it.scheme == "file" }?.path?.let { File(it).parent }
 
 @Composable
 private fun EditorTextArea(

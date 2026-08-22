@@ -30,9 +30,12 @@ object MarkdownParser {
 
     private val commentRegex = Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL)
     private val tagRegex = Regex(
-        "<(/?)([a-zA-Z][a-zA-Z0-9]*)((?:\\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:=\"[^\"]*\")?)*)\\s*(/?)>"
+        "<(/?)([a-zA-Z][a-zA-Z0-9]*)((?:\\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*"
+            + "(?:=(?:\"[^\"]*\"|'[^']*'|[^\\s\"'=<>`]+))?)*)\\s*(/?)>"
     )
-    private val attrRegex = Regex("([a-zA-Z_:][-a-zA-Z0-9_:.]*)=\"([^\"]*)\"")
+    private val attrRegex = Regex(
+        "([a-zA-Z_:][-a-zA-Z0-9_:.]*)=(?:\"([^\"]*)\"|'([^']*)'|([^\\s\"'=<>`]+))"
+    )
     private val numericEntityRegex = Regex("&#(x?[0-9a-fA-F]+);")
 
     private fun tokenize(html: String): List<HtmlToken> {
@@ -46,8 +49,10 @@ object MarkdownParser {
             }
             val isClose = match.groupValues[1] == "/"
             val tag = match.groupValues[2].lowercase()
-            val attrs = attrRegex.findAll(match.groupValues[3])
-                .associate { it.groupValues[1] to unescapeHtml(it.groupValues[2]) }
+            val attrs = attrRegex.findAll(match.groupValues[3]).associate { m ->
+                val value = m.groups[2]?.value ?: m.groups[3]?.value ?: m.groups[4]?.value ?: ""
+                m.groupValues[1] to unescapeHtml(value)
+            }
             val selfClosing = match.groupValues[4] == "/" || tag in VOID_TAGS
             tokens += when {
                 isClose -> HtmlToken.Close(tag)
@@ -117,22 +122,45 @@ object MarkdownParser {
 
     private val BLOCK_TAGS = setOf("p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "ul", "ol", "pre", "hr", "table")
 
+    // сырой HTML проходит сквозь cmark-gfm (unsafe): незнакомые теги прозрачно
+    // разворачиваем, непоказываемые/потенциально опасные содержимые — выбрасываем
+    private val DROP_TAGS = setOf(
+        "script", "style", "head", "title", "template",
+        "iframe", "object", "embed", "noscript", "svg", "math"
+    )
+
     private fun htmlToBlocks(html: String): List<BlockNode> = elementsToBlocks(buildTree(tokenize(html)))
 
-    private fun elementsToBlocks(nodes: List<HtmlNode>): List<BlockNode> =
-        nodes.filterIsInstance<HtmlNode.Element>().mapNotNull(::elementToBlock)
+    private fun elementsToBlocks(nodes: List<HtmlNode>): List<BlockNode> = nodes.flatMap { node ->
+        when (node) {
+            is HtmlNode.Element -> elementToBlocks(node)
+            is HtmlNode.Text -> textToBlocks(node)
+        }
+    }
 
-    private fun elementToBlock(el: HtmlNode.Element): BlockNode? = when (el.tag) {
-        "p" -> BlockNode.Paragraph(childrenToInline(el.children))
-        "hr" -> BlockNode.ThematicBreak
+    private fun textToBlocks(text: HtmlNode.Text): List<BlockNode> {
+        val trimmed = text.text.trim()
+        return if (trimmed.isEmpty()) {
+            emptyList()
+        } else {
+            listOf(BlockNode.Paragraph(listOf(InlineNode.Text(trimmed))))
+        }
+    }
+
+    private fun elementToBlocks(el: HtmlNode.Element): List<BlockNode> = when (el.tag) {
+        "p" -> listOf(BlockNode.Paragraph(childrenToInline(el.children)))
+        "hr" -> listOf(BlockNode.ThematicBreak)
         "h1", "h2", "h3", "h4", "h5", "h6" ->
-            BlockNode.Heading(el.tag.substring(1).toInt(), childrenToInline(el.children))
-        "blockquote" -> BlockNode.BlockQuote(elementsToBlocks(el.children))
-        "ul" -> BlockNode.BulletList(listItems(el))
-        "ol" -> BlockNode.OrderedList(start = el.attrs["start"]?.toIntOrNull() ?: 1, items = listItems(el))
-        "pre" -> codeBlockFrom(el)
-        "table" -> tableFrom(el)
-        else -> null
+            listOf(BlockNode.Heading(el.tag.substring(1).toInt(), childrenToInline(el.children)))
+        "blockquote" -> listOf(BlockNode.BlockQuote(elementsToBlocks(el.children)))
+        "ul" -> listOf(BlockNode.BulletList(listItems(el)))
+        "ol" -> listOf(BlockNode.OrderedList(start = el.attrs["start"]?.toIntOrNull() ?: 1, items = listItems(el)))
+        "pre" -> listOf(codeBlockFrom(el))
+        "table" -> listOf(tableFrom(el))
+        // блочный <img>: cmark не заворачивает его в <p>
+        "img" -> listOf(BlockNode.Paragraph(listOf(imageInline(el.attrs))))
+        in DROP_TAGS -> emptyList()
+        else -> elementsToBlocks(el.children)
     }
 
     private fun listItems(list: HtmlNode.Element): List<List<BlockNode>> =
@@ -188,21 +216,27 @@ object MarkdownParser {
     }
 
     private fun childrenToInline(children: List<HtmlNode>): List<InlineNode> =
-        children.mapNotNull(::nodeToInline)
+        children.flatMap(::nodeToInline)
 
-    private fun nodeToInline(node: HtmlNode): InlineNode? = when (node) {
-        is HtmlNode.Text -> InlineNode.Text(node.text)
+    private fun nodeToInline(node: HtmlNode): List<InlineNode> = when (node) {
+        is HtmlNode.Text -> listOf(InlineNode.Text(node.text))
         is HtmlNode.Element -> when (node.tag) {
-            "strong" -> InlineNode.Bold(childrenToInline(node.children))
-            "em" -> InlineNode.Italic(childrenToInline(node.children))
-            "code" -> InlineNode.Code(
-                node.children.filterIsInstance<HtmlNode.Text>().joinToString("") { it.text }
+            "strong" -> listOf(InlineNode.Bold(childrenToInline(node.children)))
+            "em" -> listOf(InlineNode.Italic(childrenToInline(node.children)))
+            "code" -> listOf(
+                InlineNode.Code(
+                    node.children.filterIsInstance<HtmlNode.Text>().joinToString("") { it.text }
+                )
             )
-            "a" -> InlineNode.Link(childrenToInline(node.children), node.attrs["href"].orEmpty())
-            "img" -> InlineNode.Image(alt = node.attrs["alt"].orEmpty(), url = node.attrs["src"].orEmpty())
-            "br" -> InlineNode.LineBreak
-            "del" -> InlineNode.Strikethrough(childrenToInline(node.children))
-            else -> null
+            "a" -> listOf(InlineNode.Link(childrenToInline(node.children), node.attrs["href"].orEmpty()))
+            "img" -> listOf(imageInline(node.attrs))
+            "br" -> listOf(InlineNode.LineBreak)
+            "del" -> listOf(InlineNode.Strikethrough(childrenToInline(node.children)))
+            in DROP_TAGS -> emptyList()
+            else -> childrenToInline(node.children)
         }
     }
+
+    private fun imageInline(attrs: Map<String, String>): InlineNode.Image =
+        InlineNode.Image(alt = attrs["alt"].orEmpty(), url = attrs["src"].orEmpty())
 }

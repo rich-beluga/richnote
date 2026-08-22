@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
@@ -66,8 +67,8 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
                 appendInline(node.children, linkColor)
             }
             is InlineNode.Image -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                // загрузчик изображений отсутствует -> плейсхолдер
-                // TODO: добавить поддержку отрисовки изображений
+                // картинки глубоко внутри вложенных инлайнов (не на верхнем
+                // уровне блока) — заглушка; блочный рендер см. InlineContentView
                 append("🖼 ${node.alt.ifBlank { "изображение" }}")
             }
             is InlineNode.Strikethrough -> withStyle(
@@ -82,6 +83,83 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
 
 fun List<InlineNode>.toAnnotatedString(linkColor: Color): AnnotatedString = buildAnnotatedString {
     appendInline(this@toAnnotatedString, linkColor)
+}
+
+private fun InlineNode.containsImage(): Boolean = when (this) {
+    is InlineNode.Image -> true
+    is InlineNode.Bold -> children.any { it.containsImage() }
+    is InlineNode.Italic -> children.any { it.containsImage() }
+    is InlineNode.Link -> children.any { it.containsImage() }
+    is InlineNode.Strikethrough -> children.any { it.containsImage() }
+    else -> false
+}
+
+private fun InlineNode.asStandaloneImage(): InlineNode.Image? = when (this) {
+    is InlineNode.Image -> this
+    // [![alt](img)](ссылка) — картинка-обёрнутая-в-ссылку рендерится как картинка
+    is InlineNode.Link -> children
+        .filterNot { it is InlineNode.Text && it.value.isBlank() }
+        .singleOrNull() as? InlineNode.Image
+    else -> null
+}
+
+/**
+ * Рендерит список инлайнов: чистый текст — одним Text, наличие картинок —
+ * чередованием Text и MarkdownImage в колонке.
+ */
+@Composable
+private fun InlineContentView(
+    inlines: List<InlineNode>,
+    linkColor: Color,
+    style: TextStyle,
+    baseDir: String?,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null,
+    maxImageHeight: Dp = 320.dp
+) {
+    if (inlines.none { it.containsImage() }) {
+        Text(
+            text = inlines.toAnnotatedString(linkColor),
+            style = style,
+            textAlign = textAlign,
+            modifier = modifier
+        )
+        return
+    }
+
+    Column(modifier = modifier) {
+        val textRun = mutableListOf<InlineNode>()
+
+        @Composable
+        fun flushText() {
+            if (textRun.isNotEmpty()) {
+                Text(
+                    text = textRun.toList().toAnnotatedString(linkColor),
+                    style = style,
+                    textAlign = textAlign,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                textRun.clear()
+            }
+        }
+
+        for (node in inlines) {
+            val image = node.asStandaloneImage()
+            if (image != null) {
+                flushText()
+                MarkdownImage(
+                    url = image.url,
+                    alt = image.alt,
+                    baseDir = baseDir,
+                    maxHeight = maxImageHeight,
+                    modifier = Modifier.padding(vertical = 2.dp)
+                )
+            } else {
+                textRun += node
+            }
+        }
+        flushText()
+    }
 }
 
 @Composable
@@ -100,20 +178,28 @@ private fun headingStyle(level: Int): TextStyle {
 }
 
 @Composable
-fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
+fun MarkdownBlockView(
+    block: BlockNode,
+    modifier: Modifier = Modifier,
+    baseDir: String? = null
+) {
     val linkColor = MaterialTheme.colorScheme.primary
 
     when (block) {
-        is BlockNode.Paragraph -> Text(
-            text = block.inline.toAnnotatedString(linkColor),
-            modifier = modifier.padding(vertical = 4.dp),
-            style = MaterialTheme.typography.bodyLarge
+        is BlockNode.Paragraph -> InlineContentView(
+            inlines = block.inline,
+            linkColor = linkColor,
+            style = MaterialTheme.typography.bodyLarge,
+            baseDir = baseDir,
+            modifier = modifier.padding(vertical = 4.dp)
         )
 
-        is BlockNode.Heading -> Text(
-            text = block.inline.toAnnotatedString(linkColor),
-            modifier = modifier.padding(top = 12.dp, bottom = 4.dp),
-            style = headingStyle(block.level)
+        is BlockNode.Heading -> InlineContentView(
+            inlines = block.inline,
+            linkColor = linkColor,
+            style = headingStyle(block.level),
+            baseDir = baseDir,
+            modifier = modifier.padding(top = 12.dp, bottom = 4.dp)
         )
 
         BlockNode.ThematicBreak -> HorizontalDivider(modifier = modifier.padding(vertical = 8.dp))
@@ -149,17 +235,17 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
                     .background(MaterialTheme.colorScheme.outline)
             )
             Column(modifier = Modifier.padding(start = 12.dp)) {
-                block.children.forEach { child -> MarkdownBlockView(child) }
+                block.children.forEach { child -> MarkdownBlockView(child, baseDir = baseDir) }
             }
         }
 
         is BlockNode.BulletList -> Column(modifier = modifier.padding(vertical = 4.dp)) {
-            block.items.forEach { item -> ListItemRow(marker = "•", children = item) }
+            block.items.forEach { item -> ListItemRow(marker = "•", children = item, baseDir = baseDir) }
         }
 
         is BlockNode.OrderedList -> Column(modifier = modifier.padding(vertical = 4.dp)) {
             block.items.forEachIndexed { index, item ->
-                ListItemRow(marker = "${block.start + index}.", children = item)
+                ListItemRow(marker = "${block.start + index}.", children = item, baseDir = baseDir)
             }
         }
 
@@ -177,10 +263,10 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
                     .clip(RoundedCornerShape(8.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
             ) {
-                TableRowView(cells = block.header, alignments = block.alignments, isHeader = true)
+                TableRowView(cells = block.header, alignments = block.alignments, isHeader = true, baseDir = baseDir)
                 block.rows.forEach { row ->
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    TableRowView(cells = row, alignments = block.alignments, isHeader = false)
+                    TableRowView(cells = row, alignments = block.alignments, isHeader = false, baseDir = baseDir)
                 }
             }
         }
@@ -188,7 +274,12 @@ fun MarkdownBlockView(block: BlockNode, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAlignment>, isHeader: Boolean) {
+private fun TableRowView(
+    cells: List<List<InlineNode>>,
+    alignments: List<TableAlignment>,
+    isHeader: Boolean,
+    baseDir: String? = null
+) {
     val linkColor = MaterialTheme.colorScheme.primary
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
     Row(
@@ -204,16 +295,19 @@ private fun TableRowView(cells: List<List<InlineNode>>, alignments: List<TableAl
                 VerticalDivider(color = dividerColor)
             }
             val alignment = alignments.getOrElse(index) { TableAlignment.NONE }
-            Text(
-                text = cell.toAnnotatedString(linkColor),
+            InlineContentView(
+                inlines = cell,
+                linkColor = linkColor,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal
                 ),
+                baseDir = baseDir,
                 textAlign = when (alignment) {
                     TableAlignment.CENTER -> TextAlign.Center
                     TableAlignment.RIGHT -> TextAlign.End
                     TableAlignment.LEFT, TableAlignment.NONE -> TextAlign.Start
                 },
+                maxImageHeight = 160.dp,
                 modifier = Modifier
                     .weight(1f)
                     .widthIn(min = 120.dp)
@@ -231,7 +325,7 @@ private fun cellPadding(alignment: TableAlignment): PaddingValues = when (alignm
 }
 
 @Composable
-private fun ListItemRow(marker: String, children: List<BlockNode>) {
+private fun ListItemRow(marker: String, children: List<BlockNode>, baseDir: String? = null) {
     Row(modifier = Modifier.padding(vertical = 2.dp)) {
         Text(
             text = marker,
@@ -241,14 +335,18 @@ private fun ListItemRow(marker: String, children: List<BlockNode>) {
                 .padding(end = 8.dp)
         )
         Column(modifier = Modifier.fillMaxWidth()) {
-            children.forEach { child -> MarkdownBlockView(child) }
+            children.forEach { child -> MarkdownBlockView(child, baseDir = baseDir) }
         }
     }
 }
 
 @Composable
-fun MarkdownDocumentView(blocks: List<BlockNode>, modifier: Modifier = Modifier) {
+fun MarkdownDocumentView(
+    blocks: List<BlockNode>,
+    modifier: Modifier = Modifier,
+    baseDir: String? = null
+) {
     Column(modifier = modifier) {
-        blocks.forEach { block -> MarkdownBlockView(block) }
+        blocks.forEach { block -> MarkdownBlockView(block, baseDir = baseDir) }
     }
 }
