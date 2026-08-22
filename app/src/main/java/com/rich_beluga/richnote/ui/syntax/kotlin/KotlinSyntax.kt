@@ -2,7 +2,6 @@ package com.rich_beluga.richnote.ui.syntax.kotlin
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.rich_beluga.richnote.ui.JetBrainsMonoItalic
 import com.rich_beluga.richnote.ui.syntax.SyntaxRule

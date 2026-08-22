@@ -3,6 +3,7 @@ package com.rich_beluga.richnote.ui.syntax.markdown
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.OffsetMapping
