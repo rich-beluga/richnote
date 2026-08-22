@@ -261,8 +261,8 @@ private fun MarkdownPreview(text: String, baseDir: String?) {
 private fun previewBaseDir(uri: android.net.Uri?): String? =
     uri?.takeIf { it.scheme == "file" }?.path?.let { File(it).parent }
 
-private val DiffAddedColor = Color(0xFFEA5655)
-private val DiffRemovedColor = Color(0xFF6AAB73)
+private val DiffAddedColor = Color(0xFF6AAB73)
+private val DiffRemovedColor = Color(0xFFEA5655)
 private val DiffChangedColor = Color(0xFFFFB86C)
 
 @Composable
