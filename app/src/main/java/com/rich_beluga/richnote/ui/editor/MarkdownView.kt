@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +21,10 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -31,11 +35,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.InlineTextContent
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.appendStringAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,11 +53,15 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rich_beluga.richnote.markdown.BlockNode
 import com.rich_beluga.richnote.markdown.InlineNode
 import com.rich_beluga.richnote.markdown.TableAlignment
 import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.ui.syntax.CodeLanguages
+
+private const val CHECKBOX_ON = "richnote-task-checkbox-on"
+private const val CHECKBOX_OFF = "richnote-task-checkbox-off"
 
 private fun AnnotatedString.Builder.appendInline(
     nodes: List<InlineNode>,
@@ -95,11 +107,10 @@ private fun AnnotatedString.Builder.appendInline(
             ) {
                 appendInline(node.children, linkColor, linkListener)
             }
-            is InlineNode.TaskCheckbox -> if (node.checked) {
-                withStyle(SpanStyle(color = linkColor)) { append("☑ ") }
-            } else {
-                withStyle(SpanStyle(color = Color(0xFF7D7D7F))) { append("☐ ") }
-            }
+            is InlineNode.TaskCheckbox -> appendStringAnnotation(
+                tag = if (node.checked) CHECKBOX_ON else CHECKBOX_OFF,
+                annotation = ""
+            )
             InlineNode.LineBreak -> append("\n")
         }
     }
@@ -159,12 +170,21 @@ private fun InlineContentView(
     maxImageHeight: Dp = 320.dp
 ) {
     val linkListener = rememberLinkListener()
+    val checkboxContent = mapOf(
+        CHECKBOX_ON to InlineTextContent(
+            Placeholder(15.sp, 15.sp, PlaceholderVerticalAlign.TextCenter)
+        ) { TaskCheckboxIcon(checked = true) },
+        CHECKBOX_OFF to InlineTextContent(
+            Placeholder(15.sp, 15.sp, PlaceholderVerticalAlign.TextCenter)
+        ) { TaskCheckboxIcon(checked = false) }
+    )
 
     if (inlines.none { it.containsImage() }) {
         Text(
             text = inlines.toAnnotatedString(linkColor, linkListener),
             style = style,
             textAlign = textAlign,
+            inlineContent = checkboxContent,
             modifier = modifier
         )
         return
@@ -180,6 +200,7 @@ private fun InlineContentView(
                     text = textRun.toList().toAnnotatedString(linkColor, linkListener),
                     style = style,
                     textAlign = textAlign,
+                    inlineContent = checkboxContent,
                     modifier = Modifier.fillMaxWidth()
                 )
                 textRun.clear()
@@ -202,6 +223,31 @@ private fun InlineContentView(
             }
         }
         flushText()
+    }
+}
+
+@Composable
+private fun TaskCheckboxIcon(checked: Boolean) {
+    val shape = RoundedCornerShape(4.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(shape)
+            .background(if (checked) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .border(
+                width = 1.5.dp,
+                color = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                shape = shape
+            )
+    ) {
+        if (checked) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.fillMaxSize().padding(2.dp)
+            )
+        }
     }
 }
 
