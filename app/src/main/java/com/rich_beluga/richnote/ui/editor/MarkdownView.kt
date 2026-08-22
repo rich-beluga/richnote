@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
@@ -35,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.InlineTextContent
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.Placeholder
@@ -43,7 +44,6 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.appendStringAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -107,9 +107,9 @@ private fun AnnotatedString.Builder.appendInline(
             ) {
                 appendInline(node.children, linkColor, linkListener)
             }
-            is InlineNode.TaskCheckbox -> appendStringAnnotation(
-                tag = if (node.checked) CHECKBOX_ON else CHECKBOX_OFF,
-                annotation = ""
+            is InlineNode.TaskCheckbox -> appendInlineContent(
+                id = if (node.checked) CHECKBOX_ON else CHECKBOX_OFF,
+                alternateText = " "
             )
             InlineNode.LineBreak -> append("\n")
         }
