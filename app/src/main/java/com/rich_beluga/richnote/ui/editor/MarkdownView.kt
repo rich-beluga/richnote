@@ -1,5 +1,7 @@
 package com.rich_beluga.richnote.ui.editor
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -27,14 +29,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,15 +51,19 @@ import com.rich_beluga.richnote.markdown.TableAlignment
 import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.ui.syntax.CodeLanguages
 
-private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkColor: Color) {
+private fun AnnotatedString.Builder.appendInline(
+    nodes: List<InlineNode>,
+    linkColor: Color,
+    linkListener: LinkInteractionListener?
+) {
     for (node in nodes) {
         when (node) {
             is InlineNode.Text -> append(node.value)
             is InlineNode.Bold -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                appendInline(node.children, linkColor)
+                appendInline(node.children, linkColor, linkListener)
             }
             is InlineNode.Italic -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                appendInline(node.children, linkColor)
+                appendInline(node.children, linkColor, linkListener)
             }
             is InlineNode.Code -> withStyle(
                 SpanStyle(
@@ -63,10 +74,16 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
             ) {
                 append(node.value)
             }
-            is InlineNode.Link -> withStyle(
-                SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)
+            is InlineNode.Link -> withLink(
+                LinkAnnotation.Url(
+                    node.url,
+                    TextLinkStyles(
+                        style = SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)
+                    ),
+                    linkInteractionListener = linkListener
+                )
             ) {
-                appendInline(node.children, linkColor)
+                appendInline(node.children, linkColor, linkListener)
             }
             is InlineNode.Image -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 // картинки глубоко внутри вложенных инлайнов (не на верхнем
@@ -76,15 +93,32 @@ private fun AnnotatedString.Builder.appendInline(nodes: List<InlineNode>, linkCo
             is InlineNode.Strikethrough -> withStyle(
                 SpanStyle(textDecoration = TextDecoration.LineThrough)
             ) {
-                appendInline(node.children, linkColor)
+                appendInline(node.children, linkColor, linkListener)
             }
             InlineNode.LineBreak -> append("\n")
         }
     }
 }
 
-fun List<InlineNode>.toAnnotatedString(linkColor: Color): AnnotatedString = buildAnnotatedString {
-    appendInline(this@toAnnotatedString, linkColor)
+fun List<InlineNode>.toAnnotatedString(
+    linkColor: Color,
+    linkListener: LinkInteractionListener? = null
+): AnnotatedString = buildAnnotatedString {
+    appendInline(this@toAnnotatedString, linkColor, linkListener)
+}
+
+// клик по ссылке во внешнем приложении-обработчике; runCatching — чтобы
+// кривые/локальные url не роняли превью
+@Composable
+private fun rememberLinkListener(): LinkInteractionListener {
+    val context = LocalContext.current
+    return remember(context) {
+        LinkInteractionListener { link ->
+            (link as? LinkAnnotation.Url)?.url?.let { url ->
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            }
+        }
+    }
 }
 
 private fun InlineNode.containsImage(): Boolean = when (this) {
@@ -119,9 +153,11 @@ private fun InlineContentView(
     textAlign: TextAlign? = null,
     maxImageHeight: Dp = 320.dp
 ) {
+    val linkListener = rememberLinkListener()
+
     if (inlines.none { it.containsImage() }) {
         Text(
-            text = inlines.toAnnotatedString(linkColor),
+            text = inlines.toAnnotatedString(linkColor, linkListener),
             style = style,
             textAlign = textAlign,
             modifier = modifier
@@ -136,7 +172,7 @@ private fun InlineContentView(
         fun flushText() {
             if (textRun.isNotEmpty()) {
                 Text(
-                    text = textRun.toList().toAnnotatedString(linkColor),
+                    text = textRun.toList().toAnnotatedString(linkColor, linkListener),
                     style = style,
                     textAlign = textAlign,
                     modifier = Modifier.fillMaxWidth()
