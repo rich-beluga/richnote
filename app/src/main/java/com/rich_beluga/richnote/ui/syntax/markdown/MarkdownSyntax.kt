@@ -165,7 +165,7 @@ class MarkdownVisualTransformation(
                 val rules = CodeLanguages.rulesFor(info) ?: continue
                 val inner = RegexSyntaxHighlighter(rules).highlight(source.substring(contentRange))
                 for (span in inner.spanStyles) {
-                    addStyle(span.style, contentRange.first + span.start, contentRange.first + span.end)
+                    addStyle(span.item, contentRange.first + span.start, contentRange.first + span.end)
                 }
             }
         }
