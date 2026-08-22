@@ -2,10 +2,11 @@ package com.rich_beluga.richnote.ui.editor
 
 import androidx.compose.foundation.BringIntoViewRequester
 import androidx.compose.foundation.background
-import androidx.compose.foundation.bringIntoViewRequester
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -213,6 +216,7 @@ private data class EditorStats(
                             DeltaType.DELETE -> removed += delta.source.lines.size
                             DeltaType.CHANGE ->
                                 changed += maxOf(delta.source.lines.size, delta.target.lines.size)
+                            DeltaType.EQUAL -> {}
                         }
                     }
                 }
