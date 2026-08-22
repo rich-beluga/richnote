@@ -1,13 +1,18 @@
 package com.rich_beluga.richnote.ui.editor
 
+import androidx.compose.foundation.BringIntoViewRequester
 import androidx.compose.foundation.background
+import androidx.compose.foundation.bringIntoViewRequester
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -55,6 +61,9 @@ import com.rich_beluga.richnote.ui.JetBrainsMono
 import com.rich_beluga.richnote.core.EditorUiState
 import com.rich_beluga.richnote.markdown.MarkdownParser
 import com.rich_beluga.richnote.ui.syntax.markdown.MarkdownVisualTransformation
+import com.github.difflib.DiffUtils
+import com.github.difflib.patch.DeltaType
+import kotlinx.coroutines.delay
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,18 +126,105 @@ fun EditorScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.surface)
-                .imePadding()
         ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            Column(modifier = Modifier.fillMaxSize().imePadding()) {
+                Box(modifier = Modifier.weight(1f)) {
+                    when {
+                        state.isLoading -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                        showPreview -> MarkdownPreview(
+                            text = state.content.text,
+                            baseDir = previewBaseDir(state.uri)
+                        )
+                        else -> EditorTextArea(state = state, onContentChange = onContentChange)
+                    }
                 }
-                showPreview -> MarkdownPreview(
-                    text = state.content.text,
-                    baseDir = previewBaseDir(state.uri)
-                )
-                else -> EditorTextArea(state = state, onContentChange = onContentChange)
+                EditorStatsBar(state = state)
             }
+        }
+    }
+}
+
+@Composable
+private fun EditorStatsBar(state: EditorUiState) {
+    val stats = remember(state.content.text, state.originalContent) {
+        EditorStats.of(state.content.text, state.originalContent)
+    }
+
+    Surface(tonalElevation = 1.dp, color = MaterialTheme.colorScheme.surfaceContainer) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Строк: ${stats.lines}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Символов: ${stats.chars}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (stats.hasDiff) {
+                Text(
+                    text = buildString {
+                        append("+${stats.added}")
+                        append(" −${stats.removed}")
+                        if (stats.changed > 0) append(" ~${stats.changed}")
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = if (stats.hasDiff) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private data class EditorStats(
+    val lines: Int,
+    val chars: Int,
+    val added: Int,
+    val removed: Int,
+    val changed: Int
+) {
+    val hasDiff: Boolean get() = added + removed + changed > 0
+
+    companion object {
+        fun of(current: String, original: String): EditorStats {
+            val lines = if (current.isEmpty()) 0 else current.count { it == '\n' } + 1
+
+            var added = 0
+            var removed = 0
+            var changed = 0
+            if (current != original) {
+                runCatching {
+                    val patch = DiffUtils.diff(original.lines(), current.lines())
+                    for (delta in patch.deltas) {
+                        when (delta.type) {
+                            DeltaType.INSERT -> added += delta.target.lines.size
+                            DeltaType.DELETE -> removed += delta.source.lines.size
+                            DeltaType.CHANGE ->
+                                changed += maxOf(delta.source.lines.size, delta.target.lines.size)
+                        }
+                    }
+                }
+            }
+
+            return EditorStats(
+                lines = lines,
+                chars = current.length,
+                added = added,
+                removed = removed,
+                changed = changed
+            )
         }
     }
 }
@@ -159,6 +255,16 @@ private fun EditorTextArea(
     val hScroll = rememberScrollState()
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val density = LocalDensity.current
+    val lineHighlightRequester = remember { BringIntoViewRequester() }
+
+    // компенсация появления клавиатуры: показываем строку с курсором
+    val imeOpen = WindowInsets.ime.getBottom(density) > 0
+    LaunchedEffect(imeOpen, layoutResult) {
+        if (!imeOpen || layoutResult == null) return@LaunchedEffect
+        // ждём, пока imePadding сожмёт вьюпорт
+        delay(150)
+        runCatching { lineHighlightRequester.bringIntoView() }
+    }
 
     Box(
         modifier = Modifier
@@ -177,6 +283,7 @@ private fun EditorTextArea(
                         .offset(y = top.toDp())
                         .height((bottom - top).toDp())
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                        .bringIntoViewRequester(lineHighlightRequester)
                 )
             }
         }
