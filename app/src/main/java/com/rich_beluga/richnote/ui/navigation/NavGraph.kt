@@ -6,7 +6,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rich_beluga.richnote.ui.AboutScreen
-import com.rich_beluga.richnote.ui.LibrariesScreen
 import com.rich_beluga.richnote.ui.SettingsScreen
 
 @Composable
@@ -31,13 +30,6 @@ fun Navigation(onExitSettings: () -> Unit) {
 
             composable<NavRoutes.About> {
                 AboutScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onLibrariesClick = { navController.navigate(NavRoutes.Libraries) }
-                )
-            }
-
-            composable<NavRoutes.Libraries> {
-                LibrariesScreen(
                     onBackClick = { navController.popBackStack() }
                 )
             }

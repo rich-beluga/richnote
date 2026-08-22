@@ -8,7 +8,4 @@ sealed class NavRoutes {
 
     @Serializable
     data object About : NavRoutes()
-
-    @Serializable
-    data object Libraries : NavRoutes()
 }

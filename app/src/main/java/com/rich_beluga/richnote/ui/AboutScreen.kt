@@ -21,15 +21,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -99,7 +96,6 @@ class MorphPolygonShape(
 @Composable
 fun AboutScreen(
     onBackClick: () -> Unit,
-    onLibrariesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
@@ -242,31 +238,6 @@ fun AboutScreen(
                 onClick = null,
                 modifier = Modifier.padding(top = 10.dp)
             )
-
-            Card(
-                shape = groupedCardShape(index = 0, count = 1),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp)
-            ) {
-                ListItem(
-                    headlineContent = { Text("Libraries") },
-                    supportingContent = { Text("Открытый код, использованный в проекте") },
-                    leadingContent = {
-                        Icon(Icons.Filled.MenuBook, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(Icons.Filled.ChevronRight, contentDescription = null)
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onLibrariesClick)
-                )
-            }
         }
     }
 }
